@@ -1,0 +1,186 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a3d2e 0%, #1a6e4a 40%, #0d4f6e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 16px;
+}
+
+#login-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+}
+
+#login-header {
+    background: linear-gradient(135deg, #1a6e4a, #0d4f6e);
+    padding: 36px 32px 28px;
+    text-align: center;
+    color: white;
+}
+
+#login-header .trophy-icon {
+    font-size: 52px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+#login-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+#login-header p {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+#login-body {
+    padding: 32px;
+}
+
+.field-group {
+    margin-bottom: 20px;
+}
+
+.field-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.field-group .ui-inputfield {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    border: 1.5px solid #dde2e8 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    background: #f8f9fb !important;
+}
+
+.field-group .ui-inputfield:focus {
+    border-color: #1a6e4a !important;
+    box-shadow: 0 0 0 3px rgba(26,110,74,0.12) !important;
+    background: #fff !important;
+    outline: none !important;
+}
+
+.btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-row .ui-button {
+    flex: 1;
+    padding: 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: transform 0.15s, box-shadow 0.15s !important;
+}
+
+.btn-row .ui-button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+.btn-entrar .ui-button {
+    background: linear-gradient(135deg, #1a6e4a, #0d4f6e) !important;
+    color: #fff !important;
+}
+
+.btn-registrar .ui-button {
+    background: #f0f2f5 !important;
+    color: #333 !important;
+}
+
+/* Dialogo de registro */
+.ui-dialog .ui-dialog-titlebar {
+    background: linear-gradient(135deg, #1a6e4a, #0d4f6e) !important;
+    color: white !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 14px 20px !important;
+}
+
+.ui-dialog .ui-dialog-content {
+    padding: 24px !important;
+}
+
+.registro-grid .ui-panelgrid-cell {
+    padding: 8px 6px !important;
+    vertical-align: middle !important;
+}
+
+.registro-grid .ui-outputlabel {
+    font-weight: 600 !important;
+    color: #555 !important;
+    font-size: 13px !important;
+}
+
+.registro-grid .ui-inputfield {
+    width: 100% !important;
+    padding: 9px 12px !important;
+    border: 1.5px solid #dde2e8 !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+}
+
+.registro-grid .ui-inputfield:focus {
+    border-color: #1a6e4a !important;
+    box-shadow: 0 0 0 3px rgba(26,110,74,0.12) !important;
+    outline: none !important;
+}
+
+.btn-guardar {
+    text-align: center;
+    margin-top: 12px;
+}
+
+.btn-guardar .ui-button {
+    background: linear-gradient(135deg, #1a6e4a, #0d4f6e) !important;
+    color: white !important;
+    padding: 10px 32px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+@media (max-width: 480px) {
+    #login-wrapper {
+        padding: 0;
+    }
+    #login-card {
+        border-radius: 0;
+        min-height: 100vh;
+    }
+    .btn-row {
+        flex-direction: column;
+    }
+}

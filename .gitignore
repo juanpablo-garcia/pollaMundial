@@ -1,0 +1,29 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Open Liberty
+src/main/liberty/config/workarea/
+src/main/liberty/config/logs/
+src/main/liberty/config/*.jar
+src/main/liberty/config/bootstrap.properties
+liberty/
+
+# IDEs
+.classpath
+.project
+.settings/
+.factorypath
+*.launch
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db

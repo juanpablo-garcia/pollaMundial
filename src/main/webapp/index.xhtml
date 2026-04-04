@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<title>Copa Mundial 2026</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<h:outputStylesheet library="css" name="estilo.css" />
+</h:head>
+
+<h:body>
+	<p:growl autoUpdate="true" />
+
+	<div id="login-wrapper">
+		<div id="login-card">
+
+			<div id="login-header">
+				<span class="trophy-icon">&#127942;</span>
+				<h1>Copa Mundial 2026</h1>
+				<p>Ingresa tus datos para continuar</p>
+			</div>
+
+			<div id="login-body">
+				<h:form>
+					<div class="field-group">
+						<label for="Correo">Correo electrónico</label>
+						<p:inputText validatorMessage="Email inválido" label="Correo"
+							placeholder="tucorreo@ejemplo.com" id="Correo"
+							type="email" value="#{bean_Login.mail}" required="true">
+							<f:validateRegex
+								pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+						</p:inputText>
+					</div>
+
+					<div class="field-group">
+						<label for="contrasena1">Contraseña</label>
+						<p:password label="Contraseña" required="true" redisplay="true"
+							id="contrasena1" placeholder="••••••••"
+							value="#{bean_Login.contrasena}" feedback="false" />
+					</div>
+
+					<div class="btn-row">
+						<span class="btn-entrar">
+							<p:commandButton update="@form" value="Entrar"
+								actionListener="#{bean_Login.login}" icon="pi pi-sign-in" />
+						</span>
+						<span class="btn-registrar">
+							<p:commandButton type="button" value="Registrarse"
+								onclick="PF('dialogoregistro').show();" icon="pi pi-user-plus" />
+						</span>
+					</div>
+				</h:form>
+			</div>
+
+		</div>
+	</div>
+
+	<p:dialog header="Registro de usuario" dynamic="true" width="480"
+		widgetVar="dialogoregistro" id="dialogoregistro" modal="true" responsive="true">
+		<h:form>
+			<p:panelGrid columnClasses="ui-g-4 ui-g-8" columns="2"
+				layout="grid" styleClass="registro-grid">
+
+				<p:outputLabel for="name" value="Nombre" />
+				<p:inputText id="name" value="#{bean_Login.nombre}" placeholder="Tu nombre" />
+
+				<p:outputLabel for="mail" value="Correo" />
+				<p:inputText validatorMessage="Email inválido" id="mail"
+					value="#{bean_Login.mail}" placeholder="tucorreo@ejemplo.com">
+					<f:validateRegex
+						pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+				</p:inputText>
+
+				<p:outputLabel for="telefono" value="Teléfono" />
+				<p:inputText id="telefono" value="#{bean_Login.telefono}"
+					placeholder="Número de teléfono" />
+
+				<p:outputLabel for="contrasena" value="Contraseña" />
+				<p:password id="contrasena" value="#{bean_Login.contrasena}"
+					match="contrasena2" redisplay="true" placeholder="••••••••" />
+
+				<p:outputLabel for="contrasena2" value="Confirmar contraseña" />
+				<p:password id="contrasena2" value="#{bean_Login.contrasena}"
+					redisplay="true" placeholder="••••••••" />
+
+			</p:panelGrid>
+
+			<div class="btn-guardar">
+				<p:commandButton update="@form" value="Guardar"
+					oncomplete="PF('dialogoregistro').hide();"
+					actionListener="#{bean_Login.guardar}" icon="pi pi-check" />
+			</div>
+		</h:form>
+	</p:dialog>
+
+</h:body>
+</html>

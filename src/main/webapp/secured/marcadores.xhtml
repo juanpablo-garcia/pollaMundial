@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<title>Copa Mundial 2026</title>
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, user-scalable=no" />
+	<h:outputStylesheet library="css" name="secured.css" />
+	<h:outputScript library="js" name="marcadores.js" target="body" />
+</h:head>
+
+<h:body>
+	<p:growl autoUpdate="true" />
+	<h:form>
+
+		<p:menubar>
+			<p:menuitem value="Mis Marcadores" url="marcadores.xhtml" />
+			<p:menuitem value="Resultados" url="resultados.xhtml" />
+			<p:menuitem value="Ranking" url="ranking.xhtml" />
+			<f:facet name="options">
+				<p:commandButton value="Logout" action="/"
+					actionListener="#{bean_Marcadores.bean_User.cerrarSession}"
+					icon="pi pi-sign-out" />
+			</f:facet>
+		</p:menubar>
+
+		<div class="app-content">
+			<p:panel header="Copa Mundial 2026 — Mis Marcadores">
+
+				<p:tabView id="tabpane">
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: GRUPOS
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Equipos">
+						<h:panelGroup layout="block" styleClass="grupos-grid">
+							<c:forEach begin="0" end="11" step="1" var="grupo">
+								<p:panelGrid layout="grid" columns="3"
+									columnClasses="col-num,col-flag,col-name"
+									styleClass="grupo-panel">
+									<f:facet name="header">
+										<p:outputLabel value="Grupo #{bean_Marcadores.letras[grupo]}" />
+									</f:facet>
+									<c:forEach begin="0" end="3" step="1" var="orden">
+										<c:set var="equipo"
+											value="#{bean_Marcadores.getEquipo(grupo,orden)}" />
+										<p:outputLabel value="#{equipo.atributos['orden']+1}" />
+										<h:graphicImage alt="bandera" library="images"
+											name="#{equipo.atributos['nombre'].replace(' ','_')}.png" />
+										<p:outputLabel value="#{equipo.atributos['nombre']}" />
+									</c:forEach>
+								</p:panelGrid>
+							</c:forEach>
+						</h:panelGroup>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: FASE DE GRUPOS
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Fase de Grupos">
+						<p:panelGrid styleClass="panelmarcadores" layout="grid"
+							columns="1">
+							<c:forEach var="partido"
+								items="#{bean_Marcadores.partidos_grupos}">
+								<p:panel styleClass="grupo-match-panel"
+									header="Grupo #{bean_Marcadores.letras[partido.key]}">
+									<p:dataTable reflow="true" var="pgrupo"
+										value="#{partido.value}">
+										<p:column
+											rendered="#{bean_Marcadores.bean_User.usuario.mail eq 'real@real.com'}">
+											<p:selectBooleanCheckbox value="#{pgrupo.realizado}">
+												<p:ajax />
+											</p:selectBooleanCheckbox>
+										</p:column>
+										<p:column>
+											<h:graphicImage alt="img" library="images"
+												title="#{pgrupo.eq1.atributos['nombre']}"
+												name="#{pgrupo.eq1.atributos['nombre'].replace(' ','_')}.png" />
+										</p:column>
+										<p:column colspan="2" styleClass="match-team-name">
+											<p:outputLabel title="#{pgrupo.eq1.atributos['nombre']}"
+												value="#{pgrupo.eq1.atributos['nombre']}" />
+										</p:column>
+
+										<p:column headerText="&#x1F7E1;" styleClass="card-col">
+											<p:inputText styleClass="input-ta"
+												disabled="#{!bean_Marcadores.canedit}"
+												onclick="this.setSelectionRange(0,this.value.length)"
+												value="#{pgrupo.ta1}" size="2">
+												<p:ajax listener="#{bean_Marcadores.calcularPosiciones}"
+													update="@(.panelmarcadores) @parent" />
+											</p:inputText>
+										</p:column>
+										<p:column headerText="&#x1F534;" styleClass="card-col">
+											<p:inputText styleClass="input-tr"
+												disabled="#{!bean_Marcadores.canedit}"
+												onclick="this.setSelectionRange(0,this.value.length)"
+												value="#{pgrupo.tr1}" size="2">
+												<p:ajax listener="#{bean_Marcadores.calcularPosiciones}"
+													update="@(.panelmarcadores) @parent" />
+											</p:inputText>
+										</p:column>
+										<p:column headerText="G">
+											<p:inputText disabled="#{!bean_Marcadores.canedit}"
+												onclick="this.setSelectionRange(0,this.value.length)"
+												value="#{pgrupo.goles1}" size="2">
+												<p:ajax listener="#{bean_Marcadores.calcularPosiciones}"
+													update="@(.panelmarcadores) @parent" />
+											</p:inputText>
+										</p:column>
+										<p:column headerText="G">
+											<p:inputText disabled="#{!bean_Marcadores.canedit}"
+												onclick="this.setSelectionRange(0,this.value.length)"
+												value="#{pgrupo.goles2}" size="2">
+												<p:ajax listener="#{bean_Marcadores.calcularPosiciones}"
+													update="@(.panelmarcadores) @parent" />
+											</p:inputText>
+										</p:column>
+										<p:column headerText="&#x1F7E1;" styleClass="card-col">
+											<p:inputText styleClass="input-ta"
+												disabled="#{!bean_Marcadores.canedit}"
+												onclick="this.setSelectionRange(0,this.value.length)"
+												value="#{pgrupo.ta2}" size="2">
+												<p:ajax listener="#{bean_Marcadores.calcularPosiciones}"
+													update="@(.panelmarcadores) @parent" />
+											</p:inputText>
+										</p:column>
+										<p:column headerText="&#x1F534;" styleClass="card-col">
+											<p:inputText styleClass="input-tr"
+												disabled="#{!bean_Marcadores.canedit}"
+												onclick="this.setSelectionRange(0,this.value.length)"
+												value="#{pgrupo.tr2}" size="2">
+												<p:ajax listener="#{bean_Marcadores.calcularPosiciones}"
+													update="@(.panelmarcadores) @parent" />
+											</p:inputText>
+										</p:column>
+										<p:column colspan="2" styleClass="match-team-name">
+											<p:outputLabel title="#{pgrupo.eq2.atributos['nombre']}"
+												value="#{pgrupo.eq2.atributos['nombre']}" />
+										</p:column>
+										<p:column>
+											<h:graphicImage title="#{pgrupo.eq2.atributos['nombre']}"
+												alt="img" library="images"
+												name="#{pgrupo.eq2.atributos['nombre'].replace(' ','_')}.png" />
+										</p:column>
+									</p:dataTable>
+								</p:panel>
+							</c:forEach>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: RESULTADOS FASE DE GRUPOS
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Posiciones Grupos">
+						<p:panelGrid id="presultados" styleClass="panelmarcadores"
+							layout="grid" columns="2">
+							<c:forEach var="partido"
+								items="#{bean_Marcadores.posiciones_grupos}">
+								<p:panel styleClass="grupo-match-panel"
+									header="Grupo #{bean_Marcadores.letras[partido.key]}">
+									<p:dataTable reflow="true" sortBy="#{pgrupo.atributos['pos']}"
+										var="pgrupo" value="#{partido.value}">
+										<p:column headerText="Pos">
+											<p:outputLabel value="#{pgrupo.atributos['pos']}" />
+										</p:column>
+										<p:column>
+											<h:graphicImage alt="img" library="images"
+												name="#{pgrupo.equipo.atributos['nombre'].replace(' ','_')}.png" />
+										</p:column>
+										<p:column colspan="2">
+											<p:outputLabel value="#{pgrupo.equipo.atributos['nombre']}" />
+										</p:column>
+										<p:column headerText="PJ">
+											<p:outputLabel value="#{pgrupo.atributos['pj']}" />
+										</p:column>
+										<p:column headerText="PG">
+											<p:outputLabel value="#{pgrupo.atributos['pg']}" />
+										</p:column>
+										<p:column headerText="PE">
+											<p:outputLabel value="#{pgrupo.atributos['pe']}" />
+										</p:column>
+										<p:column headerText="PP">
+											<p:outputLabel value="#{pgrupo.atributos['pp']}" />
+										</p:column>
+										<p:column headerText="GF">
+											<p:outputLabel value="#{pgrupo.atributos['gf']}" />
+										</p:column>
+										<p:column headerText="GC">
+											<p:outputLabel value="#{pgrupo.atributos['gc']}" />
+										</p:column>
+										<p:column headerText="GD">
+											<p:outputLabel value="#{pgrupo.atributos['gd']}" />
+										</p:column>
+										<p:column headerText="PT">
+											<p:outputLabel value="#{pgrupo.atributos['pt']}" />
+										</p:column>
+										<p:column headerText="&#x1F7E1;">
+											<p:outputLabel value="#{pgrupo.atributos['ta']}" />
+										</p:column>
+										<p:column headerText="&#x1F534;">
+											<p:outputLabel value="#{pgrupo.atributos['tr']}" />
+										</p:column>
+									</p:dataTable>
+								</p:panel>
+							</c:forEach>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: RONDA DE 32
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Ronda de 32">
+						<p:panelGrid styleClass="panelmarcadores" id="pronda32"
+							layout="grid" columns="1">
+							<p:dataTable reflow="true" id="tronda32" var="pgrupo"
+								value="#{bean_Marcadores.ronda32}">
+								<p:column
+									rendered="#{bean_Marcadores.bean_User.usuario.mail eq 'real@real.com'}">
+									<p:selectBooleanCheckbox value="#{pgrupo.realizado}">
+										<p:ajax />
+									</p:selectBooleanCheckbox>
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{pgrupo.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq1}"
+										name="#{pgrupo.eq1.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq1}"
+										value="#{pgrupo.atributos['eq1']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq1}"
+										value="#{pgrupo.eq1.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularOctavos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularOctavos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularOctavos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularOctavos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq2}"
+										value="#{pgrupo.atributos['eq2']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq2}"
+										value="#{pgrupo.eq2.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq2}"
+										name="#{pgrupo.eq2.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: OCTAVOS
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Octavos de Final">
+						<p:panelGrid id="poctavos" styleClass="panelmarcadores"
+							layout="grid" columns="1">
+							<p:dataTable reflow="true" id="toctavos" var="pgrupo"
+								value="#{bean_Marcadores.octavosFinal}">
+								<p:column
+									rendered="#{bean_Marcadores.bean_User.usuario.mail eq 'real@real.com'}">
+									<p:selectBooleanCheckbox value="#{pgrupo.realizado}">
+										<p:ajax />
+									</p:selectBooleanCheckbox>
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{pgrupo.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq1}"
+										name="#{pgrupo.eq1.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq1}"
+										value="#{pgrupo.atributos['eq1']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq1}"
+										value="#{pgrupo.eq1.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCuartos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCuartos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCuartos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCuartos}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq2}"
+										value="#{pgrupo.atributos['eq2']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq2}"
+										value="#{pgrupo.eq2.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq2}"
+										name="#{pgrupo.eq2.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: CUARTOS
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Cuartos de Final">
+						<p:panelGrid styleClass="panelmarcadores" id="pcuartos"
+							layout="grid" columns="1">
+							<p:dataTable reflow="true" id="tcuartos" var="pgrupo"
+								value="#{bean_Marcadores.cuartosFinal}">
+								<p:column
+									rendered="#{bean_Marcadores.bean_User.usuario.mail eq 'real@real.com'}">
+									<p:selectBooleanCheckbox value="#{pgrupo.realizado}">
+										<p:ajax />
+									</p:selectBooleanCheckbox>
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{pgrupo.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq1}"
+										name="#{pgrupo.eq1.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq1}"
+										value="#{pgrupo.atributos['eq1']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq1}"
+										value="#{pgrupo.eq1.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularSemifinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularSemifinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularSemifinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularSemifinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq2}"
+										value="#{pgrupo.atributos['eq2']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq2}"
+										value="#{pgrupo.eq2.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq2}"
+										name="#{pgrupo.eq2.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: SEMIFINALES
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Semifinales">
+						<p:panelGrid id="psemifinales" styleClass="panelmarcadores"
+							layout="grid" columns="1">
+							<p:dataTable reflow="true" id="tsemis" var="pgrupo"
+								value="#{bean_Marcadores.semifinales}">
+								<p:column
+									rendered="#{bean_Marcadores.bean_User.usuario.mail eq 'real@real.com'}">
+									<p:selectBooleanCheckbox value="#{pgrupo.realizado}">
+										<p:ajax />
+									</p:selectBooleanCheckbox>
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{pgrupo.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq1}"
+										name="#{pgrupo.eq1.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq1}"
+										value="#{pgrupo.atributos['eq1']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq1}"
+										value="#{pgrupo.eq1.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularFinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularFinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularFinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularFinales}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq2}"
+										value="#{pgrupo.atributos['eq2']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq2}"
+										value="#{pgrupo.eq2.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq2}"
+										name="#{pgrupo.eq2.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: FINALES
+					     ══════════════════════════════════════════ -->
+					<p:tab title="Finales">
+						<p:panelGrid id="pfinales" styleClass="panelmarcadores"
+							layout="grid" columns="1">
+							<p:dataTable reflow="true" id="tfinal" var="pgrupo"
+								value="#{bean_Marcadores.finales}">
+								<p:column
+									rendered="#{bean_Marcadores.bean_User.usuario.mail eq 'real@real.com'}">
+									<p:selectBooleanCheckbox value="#{pgrupo.realizado}">
+										<p:ajax />
+									</p:selectBooleanCheckbox>
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{pgrupo.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq1}"
+										name="#{pgrupo.eq1.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq1}"
+										value="#{pgrupo.atributos['eq1']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq1}"
+										value="#{pgrupo.eq1.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCampeon}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq1 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales1}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCampeon}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column headerText="Pen">
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2 and pgrupo.goles1 eq pgrupo.goles2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.penales2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCampeon}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column>
+									<p:inputText disabled="#{!bean_Marcadores.canedit}"
+										rendered="#{!empty pgrupo.eq2}"
+										onclick="this.setSelectionRange(0,this.value.length)"
+										value="#{pgrupo.goles2}" size="2">
+										<p:ajax listener="#{bean_Marcadores.calcularCampeon}"
+											update="@(.panelmarcadores) @parent" />
+									</p:inputText>
+								</p:column>
+								<p:column styleClass="match-team-name">
+									<p:outputLabel rendered="#{empty pgrupo.eq2}"
+										value="#{pgrupo.atributos['eq2']}" />
+									<p:outputLabel rendered="#{!empty pgrupo.eq2}"
+										value="#{pgrupo.eq2.atributos['nombre']}" />
+								</p:column>
+								<p:column>
+									<h:graphicImage alt="img" library="images"
+										rendered="#{!empty pgrupo.eq2}"
+										name="#{pgrupo.eq2.atributos['nombre'].replace(' ','_')}.png" />
+								</p:column>
+							</p:dataTable>
+						</p:panelGrid>
+					</p:tab>
+
+					<!-- ══════════════════════════════════════════
+					     PESTAÑA: CAMPEÓN
+					     ══════════════════════════════════════════ -->
+					<p:tab title="&#127942; Campeón">
+						<div class="campeon-display">
+							<p:outputLabel styleClass="campeon-nombre"
+								rendered="#{!empty bean_Marcadores.campeon}"
+								value="#{bean_Marcadores.campeon.atributos['nombre']}" />
+							<h:graphicImage alt="campeon" library="images"
+								styleClass="campeon-flag"
+								rendered="#{!empty bean_Marcadores.campeon}"
+								name="#{bean_Marcadores.campeon.atributos['nombre'].replace(' ','_')}.png" />
+						</div>
+					</p:tab>
+
+				</p:tabView>
+			</p:panel>
+		</div>
+
+		<!-- Botón Guardar flotante -->
+		<div class="btn-guardar-fixed">
+			<p:commandButton update="@(.panelmarcadores)" value="Guardar"
+				icon="pi pi-save" actionListener="#{bean_Marcadores.guardar}">
+				<p:confirm header="Confirmación"
+					message="¿Desea guardar sus marcadores?" />
+			</p:commandButton>
+		</div>
+
+		<p:confirmDialog disabled="#{!bean_Marcadores.canedit}" global="true"
+			showEffect="fade" hideEffect="fade">
+			<p:commandButton value="Sí" type="button"
+				styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+			<p:commandButton value="No" type="button"
+				styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+		</p:confirmDialog>
+
+	</h:form>
+</h:body>
+</html>
