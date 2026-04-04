@@ -7,11 +7,9 @@ pom.xml.next
 release.properties
 
 # Open Liberty
-src/main/liberty/config/workarea/
 src/main/liberty/config/logs/
-src/main/liberty/config/*.jar
 src/main/liberty/config/bootstrap.properties
-liberty/
+
 
 # IDEs
 .classpath
