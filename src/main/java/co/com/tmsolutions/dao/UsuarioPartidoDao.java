@@ -99,27 +99,30 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 							.findFirst().orElse(null);
 					if (partidocompara != null && partidocompara.getRealizado()) {
 						p.getAtributos().put("puntaje", new Integer(0));
-						// Le pega al marcador 3 puntos
+						// Puntos por marcador segun fase
+						int ptsExacto = getPuntajeMarcadorExacto(p.getFase(), p.getAtributos().get("nombre"));
+						int ptsResultado = getPuntajeMarcadorResultado(p.getFase(), p.getAtributos().get("nombre"));
+						// Le pega al marcador exacto
 						if (p.getGoles1().equals(partidocompara.getGoles1())
 								&& p.getGoles2().equals(partidocompara.getGoles2())) {
-							p.getAtributos().put("puntaje", new Integer(3));
+							p.getAtributos().put("puntaje", new Integer(ptsExacto));
 						} else {
 							// Empate
 							if (partidocompara.getGoles1().compareTo(partidocompara.getGoles2()) == 0) {
 								if (p.getGoles1().compareTo(p.getGoles2()) == 0) {
-									p.getAtributos().put("puntaje", new Integer(1));
+									p.getAtributos().put("puntaje", new Integer(ptsResultado));
 								}
 							} else
 							// Gana equipo 1
 							if (partidocompara.getGoles1().compareTo(partidocompara.getGoles2()) > 0) {
 								if (p.getGoles1().compareTo(p.getGoles2()) > 0) {
-									p.getAtributos().put("puntaje", new Integer(1));
+									p.getAtributos().put("puntaje", new Integer(ptsResultado));
 								}
 							} else
 							// Gana equipo 2
 							if (partidocompara.getGoles1().compareTo(partidocompara.getGoles2()) < 0) {
 								if (p.getGoles1().compareTo(p.getGoles2()) < 0) {
-									p.getAtributos().put("puntaje", new Integer(1));
+									p.getAtributos().put("puntaje", new Integer(ptsResultado));
 								}
 							}
 						}
@@ -173,7 +176,7 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 					p.getAtributos().put("puntajeeq1", new Integer(0));
 					p.getAtributos().put("puntajeeq2", new Integer(0));
 					for (Partido preal : octavosreal) {
-						verificarPasoEquipo(preal, p, new Integer(3), terminoGrupo);
+						verificarPasoEquipo(preal, p, new Integer(5), terminoGrupo);
 					}
 				}
 
@@ -181,7 +184,7 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 					p.getAtributos().put("puntajeeq1", new Integer(0));
 					p.getAtributos().put("puntajeeq2", new Integer(0));
 					for (Partido preal : cuartosreal) {
-						verificarPasoEquipo(preal, p, new Integer(4), terminoGrupo);
+						verificarPasoEquipo(preal, p, new Integer(7), terminoGrupo);
 					}
 				}
 
@@ -189,7 +192,7 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 					p.getAtributos().put("puntajeeq1", new Integer(0));
 					p.getAtributos().put("puntajeeq2", new Integer(0));
 					for (Partido preal : semisreal) {
-						verificarPasoEquipo(preal, p, new Integer(5), terminoGrupo);
+						verificarPasoEquipo(preal, p, new Integer(9), terminoGrupo);
 					}
 				}
 
@@ -197,7 +200,7 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 				if (tercerocuartousuario != null) {
 					tercerocuartousuario.getAtributos().put("puntajeeq1", new Integer(0));
 					tercerocuartousuario.getAtributos().put("puntajeeq2", new Integer(0));
-					verificarPasoEquipo(tercerocuartoreal, tercerocuartousuario, new Integer(6), null);
+					verificarPasoEquipo(tercerocuartoreal, tercerocuartousuario, new Integer(9), null);
 
 					Equipo tercerousuario = tercerocuartousuario.verificarResultadoFaseFinal();
 					Equipo cuartousuario = tercerocuartousuario.verificarResultadoFaseFinalSubCampeon();
@@ -205,46 +208,34 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 					if (tercerousuario != null && terceroreal != null && terceroreal.getAtributos().get("nombre")
 							.equals(tercerousuario.getAtributos().get("nombre"))) {
 						tercerocuartousuario.getAtributos().put("puntajeeq1",
-								((Integer) tercerocuartousuario.getAtributos().get("puntajeeq1")) + new Integer(5));
+								((Integer) tercerocuartousuario.getAtributos().get("puntajeeq1")) + new Integer(6));
 					}
 
 					if (cuartousuario != null && cuartoreal != null && cuartoreal.getAtributos().get("nombre")
 							.equals(cuartousuario.getAtributos().get("nombre"))) {
 						tercerocuartousuario.getAtributos().put("puntajeeq2",
-								((Integer) tercerocuartousuario.getAtributos().get("puntajeeq2")) + new Integer(5));
+								((Integer) tercerocuartousuario.getAtributos().get("puntajeeq2")) + new Integer(4));
 					}
 
 				}
 
 				if (finalusuario != null) {
-					if (pusuaruio.getUsuario().getAtributos().get("nombre").equals("Ruth")) {
-						System.out.println(finalusuario.getEq1().getAtributos());
-						System.out.println(finalusuario.getEq2().getAtributos());
-
-					}
 					Equipo campeonusuario = finalusuario.verificarResultadoFaseFinal();
 					Equipo subcampeonusuario = finalusuario.verificarResultadoFaseFinalSubCampeon();
 
 					finalusuario.getAtributos().put("puntajecampeon", new Integer(0));
-//					final usuario
 					finalusuario.getAtributos().put("puntajeeq1", new Integer(0));
 					finalusuario.getAtributos().put("puntajeeq2", new Integer(0));
-					verificarPasoEquipo(freal, finalusuario, new Integer(6), null);
+					verificarPasoEquipo(freal, finalusuario, new Integer(10), null);
 					if (campeonusuario != null && campeonreal != null && campeonreal.getAtributos().get("nombre")
 							.equals(campeonusuario.getAtributos().get("nombre"))) {
 						finalusuario.getAtributos().put("puntajeeq1",
-								((Integer) finalusuario.getAtributos().get("puntajeeq1")) + new Integer(12));
+								((Integer) finalusuario.getAtributos().get("puntajeeq1")) + new Integer(15));
 					}
 					if (subcampeonusuario != null && subcampeonreal != null && subcampeonreal.getAtributos()
 							.get("nombre").equals(subcampeonusuario.getAtributos().get("nombre"))) {
 						finalusuario.getAtributos().put("puntajeeq2",
-								((Integer) finalusuario.getAtributos().get("puntajeeq2")) + new Integer(6));
-					}
-
-					if (pusuaruio.getUsuario().getAtributos().get("nombre").equals("Ruth")) {
-						System.out.println(finalusuario.getAtributos().get("puntajeeq1"));
-						System.out.println(finalusuario.getAtributos().get("puntajeeq2"));
-
+								((Integer) finalusuario.getAtributos().get("puntajeeq2")) + new Integer(8));
 					}
 				}
 				pusuaruio.setFechaModificacion(new Date());
@@ -253,6 +244,48 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 
 		}
 
+	}
+
+	private int getPuntajeMarcadorExacto(String fase, Object nombre) {
+		switch (fase) {
+		case "partidos_grupos":
+			return 3;
+		case "ronda32":
+			return 4;
+		case "octavosFinal":
+			return 5;
+		case "cuartosFinal":
+			return 6;
+		case "semifinales":
+			return 7;
+		case "finales":
+			if (nombre != null && "tercero y cuarto".equals(nombre))
+				return 7;
+			return 8;
+		default:
+			return 3;
+		}
+	}
+
+	private int getPuntajeMarcadorResultado(String fase, Object nombre) {
+		switch (fase) {
+		case "partidos_grupos":
+			return 1;
+		case "ronda32":
+			return 1;
+		case "octavosFinal":
+			return 2;
+		case "cuartosFinal":
+			return 2;
+		case "semifinales":
+			return 3;
+		case "finales":
+			if (nombre != null && "tercero y cuarto".equals(nombre))
+				return 3;
+			return 3;
+		default:
+			return 1;
+		}
 	}
 
 	private void verificarPasoEquipo(Partido preal, Partido pusuario, Integer puntaje,

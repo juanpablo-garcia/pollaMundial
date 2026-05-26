@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head>
+	<title>Copa Mundial 2026 — Sistema de Puntos</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<h:outputStylesheet library="css" name="estilo.css" />
+	<style>
+		body {
+			align-items: flex-start !important;
+			padding: 20px 0 !important;
+		}
+		#puntos-wrapper {
+			width: 100%;
+			max-width: 720px;
+			padding: 16px;
+		}
+		#puntos-card {
+			background: #ffffff;
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+			overflow: hidden;
+		}
+		#puntos-header {
+			background: linear-gradient(135deg, #1a6e4a, #0d4f6e);
+			padding: 28px 32px 22px;
+			text-align: center;
+			color: white;
+		}
+		#puntos-header h1 {
+			font-size: 22px;
+			font-weight: 700;
+			letter-spacing: 0.5px;
+			margin-bottom: 4px;
+		}
+		#puntos-header p {
+			font-size: 13px;
+			opacity: 0.8;
+		}
+		#puntos-body {
+			padding: 28px 32px;
+		}
+		#puntos-body h2 {
+			font-size: 16px;
+			font-weight: 700;
+			color: #1a6e4a;
+			margin: 24px 0 10px 0;
+			border-bottom: 2px solid #e0e0e0;
+			padding-bottom: 6px;
+		}
+		#puntos-body h2:first-child {
+			margin-top: 0;
+		}
+		.puntos-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-bottom: 16px;
+			font-size: 13px;
+		}
+		.puntos-table th {
+			background: #f0f5f2;
+			color: #333;
+			font-weight: 600;
+			text-align: left;
+			padding: 8px 12px;
+			border-bottom: 2px solid #1a6e4a;
+		}
+		.puntos-table td {
+			padding: 7px 12px;
+			border-bottom: 1px solid #eee;
+		}
+		.puntos-table tr:last-child td {
+			border-bottom: none;
+		}
+		.puntos-table .pts {
+			font-weight: 700;
+			color: #1a6e4a;
+			text-align: center;
+		}
+		.puntos-note {
+			font-size: 12px;
+			color: #777;
+			margin-top: 4px;
+			line-height: 1.5;
+		}
+		.btn-volver {
+			text-align: center;
+			margin-top: 20px;
+		}
+		.btn-volver .ui-button {
+			background: linear-gradient(135deg, #1a6e4a, #0d4f6e) !important;
+			color: #fff !important;
+			padding: 10px 32px !important;
+			border-radius: 8px !important;
+			border: none !important;
+			font-size: 14px !important;
+			font-weight: 600 !important;
+		}
+		@media (max-width: 480px) {
+			#puntos-wrapper { padding: 0; }
+			#puntos-card { border-radius: 0; }
+			#puntos-body { padding: 20px 16px; }
+			.puntos-table { font-size: 12px; }
+			.puntos-table th, .puntos-table td { padding: 6px 8px; }
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<div id="puntos-wrapper">
+		<div id="puntos-card">
+
+			<div id="puntos-header">
+				<span style="font-size:42px;display:block;margin-bottom:8px;">&#9917;</span>
+				<h1>Sistema de Puntos</h1>
+				<p>Copa Mundial FIFA 2026</p>
+			</div>
+
+			<div id="puntos-body">
+
+				<h2>Prediccion de Marcador (por partido)</h2>
+				<table class="puntos-table">
+					<tr>
+						<th>Fase</th>
+						<th class="pts">Marcador exacto</th>
+						<th class="pts">Resultado correcto</th>
+					</tr>
+					<tr>
+						<td>Fase de Grupos</td>
+						<td class="pts">3</td>
+						<td class="pts">1</td>
+					</tr>
+					<tr>
+						<td>Ronda de 32</td>
+						<td class="pts">4</td>
+						<td class="pts">1</td>
+					</tr>
+					<tr>
+						<td>Octavos de Final</td>
+						<td class="pts">5</td>
+						<td class="pts">2</td>
+					</tr>
+					<tr>
+						<td>Cuartos de Final</td>
+						<td class="pts">6</td>
+						<td class="pts">2</td>
+					</tr>
+					<tr>
+						<td>Semifinales</td>
+						<td class="pts">7</td>
+						<td class="pts">3</td>
+					</tr>
+					<tr>
+						<td>3.° y 4.° puesto</td>
+						<td class="pts">7</td>
+						<td class="pts">3</td>
+					</tr>
+					<tr>
+						<td>Final</td>
+						<td class="pts">8</td>
+						<td class="pts">3</td>
+					</tr>
+				</table>
+				<p class="puntos-note">
+					<b>Marcador exacto:</b> acertar el resultado exacto (ej. 2-1 y el real fue 2-1).<br/>
+					<b>Resultado correcto:</b> acertar el ganador o el empate, sin acertar el marcador exacto.
+				</p>
+
+				<h2>Equipos que avanzan de fase</h2>
+				<table class="puntos-table">
+					<tr>
+						<th>Fase</th>
+						<th class="pts">Pts por equipo acertado</th>
+					</tr>
+					<tr>
+						<td>Ronda de 32</td>
+						<td class="pts">3</td>
+					</tr>
+					<tr>
+						<td>Octavos de Final</td>
+						<td class="pts">5</td>
+					</tr>
+					<tr>
+						<td>Cuartos de Final</td>
+						<td class="pts">7</td>
+					</tr>
+					<tr>
+						<td>Semifinales</td>
+						<td class="pts">9</td>
+					</tr>
+					<tr>
+						<td>3.° y 4.° puesto</td>
+						<td class="pts">9</td>
+					</tr>
+					<tr>
+						<td>Final</td>
+						<td class="pts">10</td>
+					</tr>
+				</table>
+				<p class="puntos-note">
+					Se otorgan por cada equipo que el usuario acerto correctamente en cada partido de fase eliminatoria.
+					Solo se evalua una vez que el grupo del equipo haya terminado todos sus partidos.
+				</p>
+
+				<h2>Bonificaciones Especiales</h2>
+				<table class="puntos-table">
+					<tr>
+						<th>Acierto</th>
+						<th class="pts">Puntos adicionales</th>
+					</tr>
+					<tr>
+						<td>Campeon correcto</td>
+						<td class="pts">+15</td>
+					</tr>
+					<tr>
+						<td>Subcampeon correcto</td>
+						<td class="pts">+8</td>
+					</tr>
+					<tr>
+						<td>3.° lugar correcto</td>
+						<td class="pts">+6</td>
+					</tr>
+					<tr>
+						<td>4.° lugar correcto</td>
+						<td class="pts">+4</td>
+					</tr>
+				</table>
+
+				<div class="btn-volver">
+					<h:form>
+						<p:button value="Volver al inicio" href="index.xhtml" icon="pi pi-arrow-left" />
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</h:body>
+</html>

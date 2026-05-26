@@ -97,13 +97,19 @@ El mismo criterio se aplica para seleccionar los **mejores terceros** que clasif
 
 ## Sistema de puntos
 
-### Fase de grupos — marcador de cada partido
+El sistema es **progresivo**: a medida que se avanza de fase, los puntos por acierto aumentan.
 
-| Resultado pronosticado | Puntos |
-|---|---|
-| Marcador exacto (ej. 2-1 y el real fue 2-1) | **3 pts** |
-| Ganador correcto o empate correcto (ej. pronostica 3-1 y gana el mismo equipo) | **1 pt** |
-| Ganador incorrecto | 0 pts |
+### Predicción de marcador (por partido)
+
+| Fase | Marcador exacto | Resultado correcto (ganador/empate) | Falla |
+|---|---|---|---|
+| Grupos | **3 pts** | **1 pt** | 0 |
+| Ronda de 32 | **4 pts** | **1 pt** | 0 |
+| Octavos de final | **5 pts** | **2 pts** | 0 |
+| Cuartos de final | **6 pts** | **2 pts** | 0 |
+| Semifinales | **7 pts** | **3 pts** | 0 |
+| 3.° y 4.° puesto | **7 pts** | **3 pts** | 0 |
+| Final | **8 pts** | **3 pts** | 0 |
 
 ### Clasificación de equipos a cada fase
 
@@ -112,25 +118,20 @@ Los puntos por clasificación se otorgan **por equipo** que el usuario acertó c
 | Fase | Puntos por equipo acertado |
 |---|---|
 | Ronda de 32 (clasificados de grupo) | **3 pts** por equipo |
-| Octavos de final | **3 pts** por equipo |
-| Cuartos de final | **4 pts** por equipo |
-| Semifinales | **5 pts** por equipo |
-| Partido por el 3.° puesto | **6 pts** por equipo |
-| Final | **6 pts** por equipo |
+| Octavos de final | **5 pts** por equipo |
+| Cuartos de final | **7 pts** por equipo |
+| Semifinales | **9 pts** por equipo |
+| Partido por el 3.° puesto | **9 pts** por equipo |
+| Final | **10 pts** por equipo |
 
-### Bonificaciones especiales (partido final)
-
-| Acierto | Puntos adicionales |
-|---|---|
-| Campeón correcto | **+12 pts** |
-| Subcampeón correcto | **+6 pts** |
-
-### Partido por el 3.° y 4.° puesto
+### Bonificaciones especiales
 
 | Acierto | Puntos adicionales |
 |---|---|
-| 3.° lugar correcto | **+5 pts** |
-| 4.° lugar correcto | **+5 pts** |
+| Campeón correcto | **+15 pts** |
+| Subcampeón correcto | **+8 pts** |
+| 3.° lugar correcto | **+6 pts** |
+| 4.° lugar correcto | **+4 pts** |
 
 ---
 

@@ -84,9 +84,9 @@ public class Bean_Marcadores implements Serializable {
 	}
 
 	private void verificarPuedeEditar() {
-		Calendar c = Calendar.getInstance(TimeZone.getDefault());
-		c.set(2026, Calendar.JUNE, 11, 7, 0);
-		Calendar c1 = Calendar.getInstance();
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("America/Bogota"));
+		c.set(2026, Calendar.JUNE, 11, 13, 0);
+		Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("America/Bogota"));
 		if (c1.compareTo(c) > 0) {
 			canedit = false;
 		}
@@ -901,14 +901,14 @@ public class Bean_Marcadores implements Serializable {
 		// 1 del H contra 2 del J
 		setR32Equipos("r32_84", getEquipoPosicion(7, 1), getEquipoPosicion(9, 2));
 		// 1 del B contra mejor Tercer E/F/G/I/J
-		setR32Equipos("r32_85", getEquipoPosicion(6, 1),
+		setR32Equipos("r32_85", getEquipoPosicion(1, 1),
 				extraerMejorTercero(mejoresTerceros, Arrays.asList(4, 5, 6, 8, 9)).getEquipo());
 
 		// 1 Del J contra 2 del H
 		setR32Equipos("r32_86", getEquipoPosicion(9, 1), getEquipoPosicion(7, 2));
 
 		// 1 del K contra mejor Tercer D/E/I/J/L
-		setR32Equipos("r32_87", getEquipoPosicion(6, 1),
+		setR32Equipos("r32_87", getEquipoPosicion(10, 1),
 				extraerMejorTercero(mejoresTerceros, Arrays.asList(3, 4, 8, 9, 11)).getEquipo());
 
 		// 2 del D contra 2 del G
