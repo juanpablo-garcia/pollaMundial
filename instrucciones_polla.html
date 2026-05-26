@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Polla Copa Mundial 2026 - Instrucciones</title>
+<style>
+  @page { margin: 1.5cm 2cm; size: letter; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 11pt;
+    color: #222;
+    line-height: 1.5;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 24px 0 16px;
+    border-bottom: 3px solid #1a6e4a;
+    margin-bottom: 20px;
+  }
+  .header .emoji { font-size: 48px; }
+  .header h1 { font-size: 22pt; color: #1a6e4a; margin: 6px 0 2px; }
+  .header p { font-size: 11pt; color: #555; }
+
+  h2 {
+    font-size: 13pt;
+    color: #fff;
+    background: linear-gradient(135deg, #1a6e4a, #0d4f6e);
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin: 20px 0 10px;
+  }
+
+  h3 {
+    font-size: 11pt;
+    color: #1a6e4a;
+    margin: 14px 0 6px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 3px;
+  }
+
+  ol, ul { margin-left: 22px; margin-bottom: 10px; }
+  li { margin-bottom: 5px; }
+
+  .step-num {
+    display: inline-block;
+    background: #1a6e4a;
+    color: #fff;
+    width: 24px; height: 24px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 10pt;
+    line-height: 24px;
+    margin-right: 6px;
+  }
+
+  .steps { list-style: none; margin-left: 0; }
+  .steps li { margin-bottom: 10px; padding-left: 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 14px;
+    font-size: 10pt;
+  }
+  th {
+    background: #f0f5f2;
+    color: #333;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 2px solid #1a6e4a;
+  }
+  td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .pts { font-weight: 700; color: #1a6e4a; text-align: center; }
+
+  .highlight {
+    background: #f0f8f4;
+    border-left: 4px solid #1a6e4a;
+    padding: 10px 14px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .warning {
+    background: #fff8e6;
+    border-left: 4px solid #e6a800;
+    padding: 10px 14px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 2px solid #1a6e4a;
+    font-size: 9pt;
+    color: #888;
+  }
+
+  @media print {
+    body { padding: 0; }
+    h2 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .highlight, .warning { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .pts { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="emoji">&#9917;</div>
+  <h1>Polla Copa Mundial 2026</h1>
+  <p>Instrucciones para participar</p>
+</div>
+
+<h2>1. Registro e ingreso</h2>
+<ul class="steps">
+  <li><span class="step-num">1</span> Ingresa a la pagina de la polla desde tu navegador.</li>
+  <li><span class="step-num">2</span> Haz clic en <b>"Registrarse"</b> y completa tus datos: nombre, correo, telefono y contrasena.</li>
+  <li><span class="step-num">3</span> Una vez registrado, inicia sesion con tu correo y contrasena.</li>
+</ul>
+
+<h2>2. Como ingresar tus pronosticos</h2>
+<p>Al ingresar veras varias pestanas. Debes llenar los marcadores en cada una:</p>
+
+<h3>Fase de Grupos</h3>
+<ul>
+  <li>Ingresa el marcador que pronosticas para <b>cada uno de los 72 partidos</b> de la fase de grupos (12 grupos x 6 partidos).</li>
+  <li>El sistema calculara automaticamente las posiciones de cada grupo segun tus marcadores.</li>
+</ul>
+
+<h3>Ronda de 32</h3>
+<ul>
+  <li>Segun las posiciones que resulten de tus marcadores de grupo, el sistema armara los cruces de la Ronda de 32.</li>
+  <li>Ingresa el marcador que pronosticas para cada partido.</li>
+  <li>Si hay empate, aparecera un campo de <b>penales</b> para definir el ganador.</li>
+</ul>
+
+<h3>Octavos, Cuartos, Semifinales y Final</h3>
+<ul>
+  <li>A medida que ingresas resultados, el sistema arma automaticamente los cruces de la siguiente fase.</li>
+  <li>Repite el proceso hasta llegar a la <b>Final</b> y el <b>partido por el 3er puesto</b>.</li>
+</ul>
+
+<div class="warning">
+  <b>IMPORTANTE:</b> Debes guardar tus pronosticos presionando el boton <b>"Guardar"</b> (abajo a la derecha).
+  Los pronosticos se bloquean el <b>11 de junio de 2026 a la 1:00 PM (hora Colombia)</b>, una hora antes del partido inaugural. Despues de esa fecha no podras modificar nada.
+</div>
+
+<h2>3. Sistema de puntos</h2>
+<p>El sistema es <b>progresivo</b>: a medida que avanza el torneo, los puntos valen mas.</p>
+
+<h3>Prediccion de marcador (por partido)</h3>
+<table>
+  <tr>
+    <th>Fase</th>
+    <th class="pts">Marcador exacto</th>
+    <th class="pts">Resultado correcto</th>
+  </tr>
+  <tr><td>Fase de Grupos</td><td class="pts">3</td><td class="pts">1</td></tr>
+  <tr><td>Ronda de 32</td><td class="pts">4</td><td class="pts">1</td></tr>
+  <tr><td>Octavos de Final</td><td class="pts">5</td><td class="pts">2</td></tr>
+  <tr><td>Cuartos de Final</td><td class="pts">6</td><td class="pts">2</td></tr>
+  <tr><td>Semifinales</td><td class="pts">7</td><td class="pts">3</td></tr>
+  <tr><td>3.&#176; y 4.&#176; puesto</td><td class="pts">7</td><td class="pts">3</td></tr>
+  <tr><td>Final</td><td class="pts">8</td><td class="pts">3</td></tr>
+</table>
+
+<div class="highlight">
+  <b>Marcador exacto:</b> acertar el resultado exacto (ej. pronosticas 2-1 y el real fue 2-1).<br>
+  <b>Resultado correcto:</b> acertar quien gana o que empatan, sin acertar el marcador exacto (ej. pronosticas 3-1 y el real fue 2-0, pero gano el mismo equipo).
+</div>
+
+<h3>Equipos que avanzan de fase</h3>
+<p>Por cada equipo que aciertes correctamente en un partido de fase eliminatoria:</p>
+<table>
+  <tr>
+    <th>Fase</th>
+    <th class="pts">Pts por equipo acertado</th>
+  </tr>
+  <tr><td>Ronda de 32</td><td class="pts">3</td></tr>
+  <tr><td>Octavos de Final</td><td class="pts">5</td></tr>
+  <tr><td>Cuartos de Final</td><td class="pts">7</td></tr>
+  <tr><td>Semifinales</td><td class="pts">9</td></tr>
+  <tr><td>3.&#176; y 4.&#176; puesto</td><td class="pts">9</td></tr>
+  <tr><td>Final</td><td class="pts">10</td></tr>
+</table>
+
+<h3>Bonificaciones especiales</h3>
+<table>
+  <tr>
+    <th>Acierto</th>
+    <th class="pts">Puntos adicionales</th>
+  </tr>
+  <tr><td>Campeon correcto</td><td class="pts">+15</td></tr>
+  <tr><td>Subcampeon correcto</td><td class="pts">+8</td></tr>
+  <tr><td>3.&#176; lugar correcto</td><td class="pts">+6</td></tr>
+  <tr><td>4.&#176; lugar correcto</td><td class="pts">+4</td></tr>
+</table>
+
+<h2>4. Seguimiento y ranking</h2>
+<ul>
+  <li><b>Resultados:</b> podras ver los pronosticos de todos los participantes.</li>
+  <li><b>Ranking:</b> una tabla y grafica en tiempo real con el puntaje acumulado de cada jugador.</li>
+  <li><b>Puntos:</b> consulta el sistema de puntos en cualquier momento desde el menu.</li>
+</ul>
+
+<h2>5. Consejos</h2>
+<ul>
+  <li>Llena <b>todos</b> los partidos, incluyendo las fases eliminatorias. Si dejas partidos vacios pierdes oportunidad de sumar puntos.</li>
+  <li>Presta atencion a las fases finales: un marcador exacto en la final vale <b>8 puntos</b> y acertar al campeon da <b>15 puntos adicionales</b>.</li>
+  <li>Guarda frecuentemente para no perder tu progreso.</li>
+  <li>Puedes modificar tus pronosticos las veces que quieras <b>antes</b> del 11 de junio a la 1:00 PM.</li>
+</ul>
+
+<div class="highlight">
+  <b>Buena suerte a todos!</b> Que gane el mejor pronosticador.
+</div>
+
+<div class="footer">
+  Polla Copa Mundial FIFA 2026 &mdash; Canada / Mexico / USA
+</div>
+
+</body>
+</html>

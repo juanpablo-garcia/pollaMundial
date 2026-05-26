@@ -11,6 +11,9 @@
 	<meta name="viewport"
 		content="width=device-width, initial-scale=1, user-scalable=no" />
 	<h:outputStylesheet library="css" name="secured.css" />
+	<c:if test="#{bean_Theme.blue}">
+		<h:outputStylesheet library="css" name="theme-blue.css" />
+	</c:if>
 	<h:outputScript library="js" name="marcadores.js" target="body" />
 </h:head>
 

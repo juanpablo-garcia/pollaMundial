@@ -1,0 +1,124 @@
+/* ================================================================
+   BLUE THEME OVERRIDES
+   Applied when POLLA_THEME=blue environment variable is set
+   ================================================================ */
+
+/* --- LOGIN (estilo.css overrides) --- */
+body {
+    background: linear-gradient(135deg, #0a2d5e 0%, #1a4e8e 40%, #0d3f8e 100%) !important;
+}
+
+#login-header {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.field-group .ui-inputfield:focus {
+    border-color: #1a4e8e !important;
+    box-shadow: 0 0 0 3px rgba(26,78,142,0.12) !important;
+}
+
+.btn-entrar .ui-button {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.registro-grid .ui-inputfield:focus {
+    border-color: #1a4e8e !important;
+    box-shadow: 0 0 0 3px rgba(26,78,142,0.12) !important;
+}
+
+.btn-guardar .ui-button {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+/* --- SECURED (secured.css overrides) --- */
+.ui-menubar {
+    background: linear-gradient(135deg, #0a2d5e 0%, #0d3f8e 100%) !important;
+}
+
+.ui-menubar .ui-menuitem > .ui-menuitem-link:hover,
+.ui-menubar .ui-menuitem.ui-menuitem-active > .ui-menuitem-link {
+    border-bottom-color: #60a5fa !important;
+}
+
+.ui-panel > .ui-panel-titlebar {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.ui-tabview .ui-tabview-nav li.ui-tabs-selected > a,
+.ui-tabview .ui-tabview-nav li.ui-tabview-selected > a {
+    color: #1a4e8e !important;
+    border-bottom-color: #1a4e8e !important;
+}
+
+.ui-tabview .ui-tabview-nav li:hover > a {
+    color: #1a4e8e !important;
+    background: #f0f5fa !important;
+}
+
+.grupo-panel > .ui-panelgrid-header {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.grupo-match-panel > .ui-panel-titlebar {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.ui-datatable .ui-datatable-header {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.ui-datatable .ui-inputtext:focus {
+    border-color: #1a4e8e !important;
+    box-shadow: 0 0 0 3px rgba(26,78,142,0.15) !important;
+}
+
+.ui-datatable .marcador-real {
+    color: #1a4e8e !important;
+    background: #edf2f7 !important;
+}
+
+.jugador-avatar {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.jugador-nombre {
+    color: #1a4e8e !important;
+}
+
+.campeon-nombre {
+    color: #1a4e8e !important;
+}
+
+.btn-guardar-fixed .ui-button {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+.posicion-2 .ui-widget-content {
+    background: #f0f5fa !important;
+}
+
+/* --- PUNTOS page overrides --- */
+#puntos-header {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}
+
+#puntos-body h2 {
+    color: #1a4e8e !important;
+}
+
+.puntos-table th {
+    background: #f0f5fa !important;
+    border-bottom-color: #1a4e8e !important;
+}
+
+.puntos-table .pts {
+    color: #1a4e8e !important;
+}
+
+.btn-volver .ui-button {
+    background: linear-gradient(135deg, #1a4e8e, #0d3f8e) !important;
+}

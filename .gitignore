@@ -22,6 +22,10 @@ src/main/liberty/config/bootstrap.properties
 *.iws
 *.ipr
 
+# Kubernetes
+kubernetes/
+kubernetes-tm/
+
 # OS
 .DS_Store
 Thumbs.db
