@@ -72,22 +72,26 @@
 				layout="grid" styleClass="registro-grid">
 
 				<p:outputLabel for="name" value="Nombre" />
-				<p:inputText id="name" value="#{bean_Login.nombre}" placeholder="Tu nombre" />
+				<p:inputText id="name" value="#{bean_Login.nombre}" placeholder="Tu nombre"
+					required="true" requiredMessage="El nombre es obligatorio" />
 
 				<p:outputLabel for="mail" value="Correo" />
 				<p:inputText validatorMessage="Email inválido" id="mail"
-					value="#{bean_Login.mail}" placeholder="tucorreo@ejemplo.com">
+					value="#{bean_Login.mail}" placeholder="tucorreo@ejemplo.com"
+					required="true" requiredMessage="El correo es obligatorio">
 					<f:validateRegex
 						pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
 				</p:inputText>
 
 				<p:outputLabel for="telefono" value="Teléfono" />
 				<p:inputText id="telefono" value="#{bean_Login.telefono}"
-					placeholder="Número de teléfono" />
+					placeholder="Número de teléfono"
+					required="true" requiredMessage="El teléfono es obligatorio" />
 
 				<p:outputLabel for="contrasena" value="Contraseña" />
 				<p:password id="contrasena" value="#{bean_Login.contrasena}"
-					match="contrasena2" redisplay="true" placeholder="••••••••" />
+					match="contrasena2" redisplay="true" placeholder="••••••••"
+					required="true" requiredMessage="La contraseña es obligatoria" />
 
 				<p:outputLabel for="contrasena2" value="Confirmar contraseña" />
 				<p:password id="contrasena2" value="#{bean_Login.contrasena}"
@@ -97,7 +101,7 @@
 
 			<div class="btn-guardar">
 				<p:commandButton update="@form" value="Guardar"
-					oncomplete="PF('dialogoregistro').hide();"
+					oncomplete="if(!args.validationFailed) PF('dialogoregistro').hide();"
 					actionListener="#{bean_Login.guardar}" icon="pi pi-check" />
 			</div>
 		</h:form>

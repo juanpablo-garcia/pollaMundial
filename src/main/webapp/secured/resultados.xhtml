@@ -37,7 +37,7 @@
 					styleClass="jugadores-lista" itemType="none">
 					<div class="jugador-item">
 						<div class="jugador-avatar">
-							#{usuario.atributos['nombre'].substring(0,1).toUpperCase()}
+							#{usuario.atributos['nombre'] != null ? usuario.atributos['nombre'].substring(0,1).toUpperCase() : '?'}
 						</div>
 						<p:link styleClass="jugador-nombre"
 							value="#{usuario.atributos['nombre']}"

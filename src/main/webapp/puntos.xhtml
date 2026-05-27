@@ -236,6 +236,69 @@
 					</tr>
 				</table>
 
+				<c:if test="#{!bean_Theme.blue}">
+
+				<h2>I. Informaci&#243;n General y Pagos</h2>
+				<table class="puntos-table">
+					<tr>
+						<th>Concepto</th>
+						<th>Detalle</th>
+					</tr>
+					<tr>
+						<td>Valor del ingreso</td>
+						<td><b>$110.000 COP</b> por cupo</td>
+					</tr>
+					<tr>
+						<td>Distribuci&#243;n del pago</td>
+						<td>$100.000 COP al pozo de premios &#8212; $10.000 COP para administraci&#243;n (desarrolladores, mantenimiento de plataforma y servidores)</td>
+					</tr>
+					<tr>
+						<td>Fecha l&#237;mite de pago e inscripci&#243;n</td>
+						<td><b>10 de junio de 2026.</b> No se aceptar&#225;n ingresos ni pagos despu&#233;s de esta fecha, sin excepciones.</td>
+					</tr>
+					<tr>
+						<td>Requisito de ingreso</td>
+						<td>Solo se habilitar&#225; el usuario en la plataforma y se permitir&#225; el ingreso al grupo oficial a las personas que ya hayan cancelado la totalidad del valor de la inscripci&#243;n y enviado el respectivo comprobante.</td>
+					</tr>
+					<tr>
+						<td>Un pago, un integrante</td>
+						<td>Por cada inscripci&#243;n cancelada ($110.000 COP), solo se permitir&#225; el ingreso de un (1) &#250;nico n&#250;mero de tel&#233;fono/usuario al grupo oficial y a la plataforma. No se permite compartir el acceso ni agregar a dos o m&#225;s personas bajo un mismo pago. Si alguien m&#225;s quiere estar en el grupo, debe cancelar su propia inscripci&#243;n.</td>
+					</tr>
+					<tr>
+						<td>Pol&#237;tica de no devoluci&#243;n</td>
+						<td>Una vez realizado el pago y habilitado el usuario, <b>NO</b> se devolver&#225; ning&#250;n dinero bajo ninguna circunstancia (incluso si el participante olvida llenar los marcadores).</td>
+					</tr>
+				</table>
+
+				<h2>II. Distribuci&#243;n de Premios &#127942;</h2>
+				<p class="puntos-note" style="margin-bottom:12px;">
+					El pozo total se calcular&#225; sumando los $100.000 COP de cada participante activo. Del pozo total recaudado, se sacar&#225; primero el premio Antipolla, y el dinero restante se dividir&#225; en los siguientes porcentajes:
+				</p>
+				<table class="puntos-table">
+					<tr>
+						<th>Posici&#243;n</th>
+						<th class="pts">Premio</th>
+					</tr>
+					<tr>
+						<td>1.&#176; Lugar (Campe&#243;n de la Polla)</td>
+						<td class="pts">70% del pozo restante</td>
+					</tr>
+					<tr>
+						<td>2.&#176; Lugar (Subcampe&#243;n)</td>
+						<td class="pts">20% del pozo restante</td>
+					</tr>
+					<tr>
+						<td>3.&#176; Lugar</td>
+						<td class="pts">10% del pozo restante</td>
+					</tr>
+					<tr>
+						<td>Premio Antipolla (&#218;ltimo lugar)</td>
+						<td class="pts">$110.000 COP (devoluci&#243;n de inscripci&#243;n)</td>
+					</tr>
+				</table>
+
+				</c:if>
+
 				<div class="btn-volver">
 					<h:form>
 						<p:commandButton value="Volver" icon="pi pi-arrow-left"
