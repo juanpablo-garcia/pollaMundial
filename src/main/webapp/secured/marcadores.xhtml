@@ -615,15 +615,17 @@
 					     PESTAÑA: CAMPEÓN
 					     ══════════════════════════════════════════ -->
 					<p:tab title="&#127942; Campeón">
-						<div class="campeon-display">
-							<p:outputLabel styleClass="campeon-nombre"
-								rendered="#{!empty bean_Marcadores.campeon}"
-								value="#{bean_Marcadores.campeon.atributos['nombre']}" />
-							<h:graphicImage alt="campeon" library="images"
-								styleClass="campeon-flag"
-								rendered="#{!empty bean_Marcadores.campeon}"
-								name="#{bean_Marcadores.campeon.atributos['nombre'].replace(' ','_')}.png" />
-						</div>
+						<p:panelGrid styleClass="panelmarcadores" layout="grid" columns="1">
+							<div class="campeon-display">
+								<p:outputLabel styleClass="campeon-nombre"
+									rendered="#{!empty bean_Marcadores.campeon}"
+									value="#{bean_Marcadores.campeon.atributos['nombre']}" />
+								<h:graphicImage alt="campeon" library="images"
+									styleClass="campeon-flag"
+									rendered="#{!empty bean_Marcadores.campeon}"
+									name="#{bean_Marcadores.campeon.atributos['nombre'].replace(' ','_')}.png" />
+							</div>
+						</p:panelGrid>
 					</p:tab>
 
 				</p:tabView>
