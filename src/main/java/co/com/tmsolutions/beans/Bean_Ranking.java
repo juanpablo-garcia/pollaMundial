@@ -228,6 +228,10 @@ public class Bean_Ranking implements Serializable {
 		// nombre del equipo acertado es un equipo que realmente clasifico. Se indexa
 		// por nombre de equipo para poder mostrarlo bajo el partido real en el que ese
 		// equipo juega (no bajo el slot del bracket del jugador, que puede diferir).
+		// La clave es fase + nombre de equipo: los puntos por clasificar son por fase
+		// (ej. llegar a R32) y se atribuyen al partido de ESA fase donde el equipo
+		// juega. Sin la fase, los puntos se repetirian en cada partido en el que
+		// aparece el equipo (incluidos los de grupos), duplicando el puntaje.
 		Map<String, Integer> puntosPorEquipoAcertado = new HashMap<>();
 		for (Partido preal : partidosReales) {
 			Partido pred = prediccionDe(preal);
@@ -237,10 +241,12 @@ public class Bean_Ranking implements Serializable {
 			Integer ptsEq1 = (Integer) pred.getAtributos().get("puntajeeq1");
 			Integer ptsEq2 = (Integer) pred.getAtributos().get("puntajeeq2");
 			if (ptsEq1 != null && ptsEq1 > 0 && pred.getEq1() != null) {
-				puntosPorEquipoAcertado.put((String) pred.getEq1().getAtributos().get("nombre"), ptsEq1);
+				puntosPorEquipoAcertado.put(claveEquipo(preal.getFase(),
+						(String) pred.getEq1().getAtributos().get("nombre")), ptsEq1);
 			}
 			if (ptsEq2 != null && ptsEq2 > 0 && pred.getEq2() != null) {
-				puntosPorEquipoAcertado.put((String) pred.getEq2().getAtributos().get("nombre"), ptsEq2);
+				puntosPorEquipoAcertado.put(claveEquipo(preal.getFase(),
+						(String) pred.getEq2().getAtributos().get("nombre")), ptsEq2);
 			}
 		}
 
@@ -266,7 +272,7 @@ public class Bean_Ranking implements Serializable {
 					continue;
 				}
 				String nombre = (String) eqReal.getAtributos().get("nombre");
-				Integer pts = puntosPorEquipoAcertado.get(nombre);
+				Integer pts = puntosPorEquipoAcertado.get(claveEquipo(preal.getFase(), nombre));
 				if (pts != null && pts > 0) {
 					equiposAcertados.add(nombre);
 					equipos += pts;
@@ -315,6 +321,11 @@ public class Bean_Ranking implements Serializable {
 	 * Eliminatorias: el numero va en el atributo "nombre" (r32_73, octavos_89,
 	 * cuartos_97, Semifinal_101...). "tercero y cuarto" = 103 y "final" = 104.
 	 */
+	/** Clave fase+equipo para atribuir los puntos por clasificacion a su fase. */
+	private String claveEquipo(String fase, String nombre) {
+		return fase + "|" + nombre;
+	}
+
 	private int numeroPartido(Partido p) {
 		Object nombreObj = p.getAtributos().get("nombre");
 		String nombre = nombreObj == null ? null : nombreObj.toString();
