@@ -33,6 +33,12 @@ function initRankingChart() {
         rankingChartInstance = null;
     }
 
+    // Altura dinámica: ~28px por participante para que quepan TODOS los nombres
+    var wrapper = document.getElementById('rankingChartWrapper');
+    if (wrapper) {
+        wrapper.style.height = Math.max(500, data.labels.length * 28 + 80) + 'px';
+    }
+
     var bgColors  = data.labels.map(function(name) { return colorForName(name).bg; });
     var brdColors = data.labels.map(function(name) { return colorForName(name).brd; });
 
@@ -61,3 +67,9 @@ function initRankingChart() {
         }
     });
 }
+
+// Como la pestaña "Gráfica" es la primera (activa por defecto), inicializamos
+// la gráfica al cargar la página, no solo al cambiar de pestaña.
+document.addEventListener('DOMContentLoaded', function () {
+    initRankingChart();
+});

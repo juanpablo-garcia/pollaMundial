@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<title>Copa Mundial 2026 — Clasificación</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<h:outputStylesheet library="css" name="estilo.css" />
+	<c:if test="#{bean_Theme.blue}">
+		<h:outputStylesheet library="css" name="theme-blue.css" />
+	</c:if>
+	<style>
+		body {
+			align-items: flex-start !important;
+			padding: 20px 0 !important;
+		}
+		#clasif-wrapper {
+			width: 100%;
+			max-width: 720px;
+			padding: 16px;
+		}
+		#clasif-card {
+			background: #ffffff;
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+			overflow: hidden;
+		}
+		#clasif-header {
+			background: linear-gradient(135deg, #1a6e4a, #0d4f6e);
+			padding: 28px 32px 22px;
+			text-align: center;
+			color: white;
+		}
+		#clasif-header h1 {
+			font-size: 22px;
+			font-weight: 700;
+			letter-spacing: 0.5px;
+			margin-bottom: 4px;
+		}
+		#clasif-header p {
+			font-size: 13px;
+			opacity: 0.8;
+		}
+		#clasif-body {
+			padding: 24px 24px;
+		}
+		.jugador-card {
+			display: flex;
+			align-items: center;
+			background: #f7faf8;
+			border: 1px solid #e7eee9;
+			border-radius: 12px;
+			padding: 12px 16px;
+			margin-bottom: 10px;
+			width: 100%;
+			text-decoration: none !important;
+			color: #333 !important;
+			cursor: pointer;
+		}
+		.jugador-card:hover { background: #eef5f0; }
+		.jugador-card .chevron {
+			flex: 0 0 auto;
+			color: #bbb;
+			font-size: 14px;
+			margin-left: 8px;
+		}
+		.jugador-card .pos {
+			flex: 0 0 42px;
+			font-size: 18px;
+			font-weight: 700;
+			color: #888;
+			text-align: center;
+		}
+		.jugador-card .nombre {
+			flex: 1 1 auto;
+			font-size: 15px;
+			font-weight: 600;
+			color: #333;
+			padding: 0 10px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+		.jugador-card .puntaje {
+			flex: 0 0 auto;
+			background: linear-gradient(135deg, #1a6e4a, #0d4f6e);
+			color: #fff;
+			font-weight: 700;
+			font-size: 15px;
+			padding: 6px 14px;
+			border-radius: 20px;
+			min-width: 56px;
+			text-align: center;
+		}
+		.jugador-card .puntaje small {
+			font-weight: 400;
+			font-size: 10px;
+			opacity: 0.85;
+			display: block;
+			line-height: 1;
+		}
+		.jugador-card.top1 { background: #fff8e1; border-color: #f5d76e; }
+		.jugador-card.top2 { background: #f4f6f7; border-color: #cfd8dc; }
+		.jugador-card.top3 { background: #fbf0e6; border-color: #e0b089; }
+		.jugador-card.top1 .pos,
+		.jugador-card.top2 .pos,
+		.jugador-card.top3 .pos { font-size: 22px; }
+		.clasif-empty {
+			text-align: center;
+			color: #999;
+			padding: 30px 10px;
+			font-size: 14px;
+		}
+		.btn-volver {
+			text-align: center;
+			margin-top: 20px;
+		}
+
+		/* ── Detalle del jugador ── */
+		.detalle-jug-header { text-align:center; margin-bottom:18px; }
+		.detalle-jug-header .nombre-jug { font-size:20px; font-weight:700; color:#0d4f6e; }
+		.detalle-jug-header .total-jug {
+			display:inline-block; margin-top:8px;
+			background:linear-gradient(135deg,#1a6e4a,#0d4f6e); color:#fff;
+			font-weight:700; font-size:16px; padding:6px 18px; border-radius:20px;
+		}
+		.detalle-jug-header .total-jug small { font-weight:400; font-size:11px; opacity:.85; }
+		.det-item {
+			border:1px solid #e7eee9; border-radius:12px;
+			padding:12px 14px; margin-bottom:10px; background:#fff;
+		}
+		.det-item .det-top {
+			display:flex; align-items:center; justify-content:space-between;
+			gap:8px; margin-bottom:8px;
+		}
+		.det-item .det-partido { font-size:14px; font-weight:700; color:#333; }
+		.det-item .det-fase { font-size:10px; color:#1a6e4a; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+		.det-item .det-pts {
+			flex:0 0 auto; background:#1a6e4a; color:#fff; font-weight:700;
+			font-size:14px; border-radius:14px; padding:4px 12px;
+		}
+		.det-lines { font-size:12.5px; color:#555; line-height:1.7; }
+		.det-lines .badge {
+			display:inline-block; border-radius:6px; padding:1px 7px;
+			font-weight:700; font-size:11px; margin-right:6px;
+		}
+		.det-lines .b-verde    { background:#A9F5BC; color:#1b5e20; }
+		.det-lines .b-amarillo { background:#F5DA81; color:#7a5c00; }
+		.det-lines .b-equipos  { background:#cfe3f5; color:#0d4f6e; }
+		.det-pendiente { font-size:11px; color:#999; font-style:italic; }
+
+		@media (max-width: 480px) {
+			#clasif-wrapper { padding: 0; }
+			#clasif-card { border-radius: 0; }
+			#clasif-body { padding: 16px 12px; }
+			.jugador-card .nombre { font-size: 14px; }
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<p:growl autoUpdate="true" />
+	<div id="clasif-wrapper">
+		<div id="clasif-card">
+
+			<div id="clasif-header">
+				<span style="font-size:42px;display:block;margin-bottom:8px;">&#127942;</span>
+				<h1>Clasificación</h1>
+				<p>Copa Mundial FIFA 2026</p>
+			</div>
+
+			<div id="clasif-body">
+				<h:form id="clasifForm">
+
+					<!-- ═══════════════ VISTA 1: TABLA DE CLASIFICACIÓN ═══════════════ -->
+					<h:panelGroup layout="block" rendered="#{empty bean_Ranking.jugadorSeleccionado}">
+
+						<ui:repeat var="jugador" value="#{bean_Ranking.ranking}" varStatus="st">
+							<p:commandLink styleClass="jugador-card #{st.index == 0 ? 'top1' : (st.index == 1 ? 'top2' : (st.index == 2 ? 'top3' : ''))}"
+								process="@this" update="clasifForm"
+								actionListener="#{bean_Ranking.seleccionarJugador(jugador.key)}">
+								<span class="pos">
+									<h:outputText rendered="#{st.index == 0}" value="&#129351;" escape="false" />
+									<h:outputText rendered="#{st.index == 1}" value="&#129352;" escape="false" />
+									<h:outputText rendered="#{st.index == 2}" value="&#129353;" escape="false" />
+									<h:outputText rendered="#{st.index gt 2}" value="#{st.index + 1}" />
+								</span>
+								<span class="nombre">#{jugador.key}</span>
+								<span class="puntaje">
+									#{jugador.value}
+									<small>pts</small>
+								</span>
+								<span class="chevron"><i class="pi pi-chevron-right"></i></span>
+							</p:commandLink>
+						</ui:repeat>
+
+						<h:panelGroup rendered="#{empty bean_Ranking.ranking}">
+							<div class="clasif-empty">Aún no hay puntajes para mostrar.</div>
+						</h:panelGroup>
+
+						<div class="btn-volver">
+							<p:button value="Inicio" icon="pi pi-home" href="index.xhtml" />
+						</div>
+					</h:panelGroup>
+
+					<!-- ═══════════════ VISTA 2: DETALLE DEL JUGADOR ═══════════════ -->
+					<h:panelGroup layout="block" rendered="#{not empty bean_Ranking.jugadorSeleccionado}">
+
+						<p:commandButton value="Volver a la tabla" icon="pi pi-arrow-left"
+							styleClass="ui-button-flat" process="@this" update="clasifForm"
+							actionListener="#{bean_Ranking.limpiarJugador}" />
+
+						<div class="detalle-jug-header" style="margin-top:14px;">
+							<div class="nombre-jug">#{bean_Ranking.jugadorSeleccionado}</div>
+							<div class="total-jug">#{bean_Ranking.totalJugador} <small>pts en total</small></div>
+						</div>
+
+						<ui:repeat var="det" value="#{bean_Ranking.detalleJugador}">
+							<div class="det-item">
+								<div class="det-top">
+									<div>
+										<div class="det-fase">#{det.fase}</div>
+										<div class="det-partido">#{det.eq1} vs #{det.eq2}</div>
+									</div>
+									<div class="det-pts">+#{det.total} pts</div>
+								</div>
+								<div class="det-lines">
+									<!-- Puntos por marcador -->
+									<h:panelGroup rendered="#{det.ptsMarcador gt 0}">
+										<div>
+											<span class="badge #{det.exacto ? 'b-verde' : 'b-amarillo'}">+#{det.ptsMarcador}</span>
+											<h:outputText rendered="#{det.exacto}" value="Marcador exacto " />
+											<h:outputText rendered="#{not det.exacto}" value="Acertó el resultado " />
+											(tu pronóstico #{det.prediccion} · real #{det.resultadoReal})
+										</div>
+									</h:panelGroup>
+									<!-- Puntos por equipos clasificados -->
+									<h:panelGroup rendered="#{det.ptsEquipos gt 0}">
+										<div>
+											<span class="badge b-equipos">+#{det.ptsEquipos}</span>
+											Equipo(s) que clasificaste: #{det.equiposAcertadosTexto}
+										</div>
+									</h:panelGroup>
+								</div>
+							</div>
+						</ui:repeat>
+
+						<h:panelGroup rendered="#{empty bean_Ranking.detalleJugador}">
+							<div class="clasif-empty">Este jugador aún no ha sumado puntos.</div>
+						</h:panelGroup>
+
+					</h:panelGroup>
+
+				</h:form>
+			</div>
+		</div>
+	</div>
+</h:body>
+</html>

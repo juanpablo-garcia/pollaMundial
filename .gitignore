@@ -10,6 +10,12 @@ release.properties
 src/main/liberty/config/logs/
 src/main/liberty/config/bootstrap.properties
 
+# Driver JDBC (lo copia el liberty-maven-plugin durante el build)
+*.jar
+
+# Scripts de datos puntuales
+pronosticos_polla.sql
+
 
 # IDEs
 .classpath

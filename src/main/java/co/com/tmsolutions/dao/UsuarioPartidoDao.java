@@ -3,7 +3,9 @@ package co.com.tmsolutions.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -15,6 +17,15 @@ import co.com.tmsolutions.model.Usuario;
 
 @Stateless
 public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
+
+	/**
+	 * Devuelve el {@link PartidosUsuario} (gestionado) de un usuario, o null si no
+	 * existe. Util para actualizar los resultados oficiales antes de recalcular.
+	 */
+	public PartidosUsuario getPorUsuario(Usuario usuario) {
+		return findAll().stream().filter(o -> o.getUsuario() != null && o.getUsuario().equals(usuario)).findFirst()
+				.orElse(null);
+	}
 
 	public String savePartidos(String id, List<Partido> partidos, Usuario usuario) {
 		PartidosUsuario partidoUsuario = null;
@@ -29,6 +40,27 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 		partidoUsuario.setFechaModificacion(new Date());
 		partidoUsuario = merge(partidoUsuario);
 		return partidoUsuario.getId();
+	}
+
+	/**
+	 * Devuelve los ids de los usuarios que ya completaron su pronóstico, es decir,
+	 * que tienen un equipo campeón definido en el partido final. Se ejecuta dentro
+	 * de la transacción del EJB para poder cargar la relación perezosa con el
+	 * usuario.
+	 */
+	public Set<String> usuariosConCampeon() {
+		Set<String> ids = new HashSet<>();
+		for (PartidosUsuario pu : findAll()) {
+			if (pu.getUsuario() == null || pu.getPartidos() == null) {
+				continue;
+			}
+			Partido finalPartido = pu.getPartidos().stream().filter(o -> o.getAtributos().get("nombre") != null
+					&& "final".equals(o.getAtributos().get("nombre"))).findFirst().orElse(null);
+			if (finalPartido != null && finalPartido.verificarResultadoFaseFinal() != null) {
+				ids.add(pu.getUsuario().getId());
+			}
+		}
+		return ids;
 	}
 
 	public void calcularResultados(Usuario usuarioreal) {

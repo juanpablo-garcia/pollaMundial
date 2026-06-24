@@ -32,19 +32,132 @@
 		</p:menubar>
 
 		<div class="app-content">
-			<p:panel header="Copa Mundial 2026 — Marcadores por Jugador">
+		  <h:panelGroup id="contenido" layout="block" styleClass="resultados-contenido">
+
+			<!-- Contadores de participantes -->
+			<div class="resumen-cards">
+				<div class="resumen-card">
+					<span class="resumen-num">#{bean_Resultados.totalParticipantes}</span>
+					<span class="resumen-label">Participantes</span>
+				</div>
+				<div class="resumen-card resumen-verde">
+					<span class="resumen-num">#{bean_Resultados.totalLlenos}</span>
+					<span class="resumen-label">Ya llenaron</span>
+				</div>
+				<div class="resumen-card resumen-rojo">
+					<span class="resumen-num">#{bean_Resultados.totalPendientes}</span>
+					<span class="resumen-label">Faltan por llenar</span>
+				</div>
+				<div class="resumen-card resumen-azul">
+					<span class="resumen-num">#{bean_Resultados.totalPagados}/#{bean_Resultados.totalParticipantes}</span>
+					<span class="resumen-label">Consignaron</span>
+				</div>
+			</div>
+
+			<!-- Sincronización de resultados oficiales (solo admin) -->
+			<h:panelGroup layout="block" rendered="#{bean_Resultados.admin}"
+				style="text-align:center; margin-bottom:16px;">
+				<p:commandButton value="Sincronizar resultados (ESPN)" icon="pi pi-refresh"
+					actionListener="#{bean_Resultados.sincronizarResultados}" update="contenido"
+					styleClass="ui-button-help" />
+			</h:panelGroup>
+
+			<!-- Pozo y premios (solo polla, no polla-tm) -->
+			<c:if test="#{!bean_Theme.blue}">
+				<p:panel styleClass="pozo-panel"
+					header="Pozo de premios">
+					<div class="pozo-total">
+						<span class="pozo-total-label">Pozo total recaudado</span>
+						<h:outputText styleClass="pozo-total-num" value="#{bean_Resultados.pozoTotal}">
+							<f:convertNumber type="currency" currencySymbol="$" locale="es_CO"
+								maxFractionDigits="0" />
+						</h:outputText>
+					</div>
+					<table class="pozo-table">
+						<tr>
+							<td>1.&#176; Lugar (Campe&#243;n) &#8212; 70%</td>
+							<td class="pozo-val">
+								<h:outputText value="#{bean_Resultados.premioPrimero}">
+									<f:convertNumber type="currency" currencySymbol="$" locale="es_CO" maxFractionDigits="0" />
+								</h:outputText>
+							</td>
+						</tr>
+						<tr>
+							<td>2.&#176; Lugar (Subcampe&#243;n) &#8212; 20%</td>
+							<td class="pozo-val">
+								<h:outputText value="#{bean_Resultados.premioSegundo}">
+									<f:convertNumber type="currency" currencySymbol="$" locale="es_CO" maxFractionDigits="0" />
+								</h:outputText>
+							</td>
+						</tr>
+						<tr>
+							<td>3.&#176; Lugar &#8212; 10%</td>
+							<td class="pozo-val">
+								<h:outputText value="#{bean_Resultados.premioTercero}">
+									<f:convertNumber type="currency" currencySymbol="$" locale="es_CO" maxFractionDigits="0" />
+								</h:outputText>
+							</td>
+						</tr>
+						<tr>
+							<td>Premio Antipolla (&#250;ltimo lugar)</td>
+							<td class="pozo-val">
+								<h:outputText value="#{bean_Resultados.premioAntipolla}">
+									<f:convertNumber type="currency" currencySymbol="$" locale="es_CO" maxFractionDigits="0" />
+								</h:outputText>
+							</td>
+						</tr>
+					</table>
+					<p class="pozo-note">
+						El pozo se arma con $100.000 COP de cada participante que ya consign&#243;
+						(#{bean_Resultados.totalPagados} de #{bean_Resultados.totalParticipantes}). Primero se
+						descuenta el premio Antipolla y el restante se reparte 70% / 20% / 10%.
+					</p>
+				</p:panel>
+			</c:if>
+
+			<p:panel header="Copa Mundial 2026 — Participantes">
+				<c:if test="#{!bean_Resultados.mundialIniciado}">
+					<p class="aviso-bloqueo">
+						<i class="pi pi-lock"></i>
+						Los marcadores de los dem&#225;s participantes estar&#225;n disponibles cuando inicie el mundial.
+					</p>
+				</c:if>
 				<p:dataList value="#{bean_Resultados.usuarios}" var="usuario"
 					styleClass="jugadores-lista" itemType="none">
-					<div class="jugador-item">
+					<div class="jugador-item #{bean_Resultados.isLleno(usuario) ? 'jugador-lleno' : 'jugador-pendiente'}">
 						<div class="jugador-avatar">
 							#{usuario.atributos['nombre'] != null ? usuario.atributos['nombre'].substring(0,1).toUpperCase() : '?'}
 						</div>
-						<p:link styleClass="jugador-nombre"
+						<span class="jugador-estado #{bean_Resultados.isLleno(usuario) ? 'estado-verde' : 'estado-rojo'}"
+							title="#{bean_Resultados.isLleno(usuario) ? 'Ya lleno sus marcadores' : 'Aun no ha llenado sus marcadores'}"></span>
+						<p:link rendered="#{bean_Resultados.mundialIniciado}"
+							styleClass="jugador-nombre"
 							value="#{usuario.atributos['nombre']}"
 							href="marcadores.xhtml?id=#{usuario.id}" />
+						<h:outputText rendered="#{!bean_Resultados.mundialIniciado}"
+							styleClass="jugador-nombre jugador-nombre-plano"
+							value="#{usuario.atributos['nombre']}" />
+
+						<!-- Estado de consignación -->
+						<span class="jugador-pago">
+							<!-- Admin: toggle (p:commandLink funciona dentro de p:dataList; un input no) -->
+							<p:commandLink rendered="#{bean_Resultados.admin}"
+								process="@this" update="@(.resultados-contenido)"
+								actionListener="#{bean_Resultados.guardarPago(usuario)}"
+								styleClass="pago-badge pago-toggle #{bean_Resultados.isPago(usuario) ? 'pago-si' : 'pago-no'}">
+								<h:outputText
+									value="#{bean_Resultados.isPago(usuario) ? 'Consignó ✓' : 'Marcar consignó'}" />
+							</p:commandLink>
+							<!-- Todos: lectura -->
+							<h:outputText rendered="#{!bean_Resultados.admin and bean_Resultados.isPago(usuario)}"
+								styleClass="pago-badge pago-si" value="Consignó" />
+							<h:outputText rendered="#{!bean_Resultados.admin and !bean_Resultados.isPago(usuario)}"
+								styleClass="pago-badge pago-no" value="Sin consignar" />
+						</span>
 					</div>
 				</p:dataList>
 			</p:panel>
+		  </h:panelGroup>
 		</div>
 
 	</h:form>

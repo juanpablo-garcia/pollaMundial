@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<title>Copa Mundial 2026 — Pronósticos</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<h:outputStylesheet library="css" name="estilo.css" />
+	<c:if test="#{bean_Theme.blue}">
+		<h:outputStylesheet library="css" name="theme-blue.css" />
+	</c:if>
+	<style>
+		body {
+			align-items: flex-start !important;
+			padding: 20px 0 !important;
+		}
+		#pron-wrapper {
+			width: 100%;
+			max-width: 760px;
+			padding: 16px;
+		}
+		#pron-card {
+			background: #ffffff;
+			border-radius: 16px;
+			box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+			overflow: hidden;
+		}
+		#pron-header {
+			background: linear-gradient(135deg, #1a6e4a, #0d4f6e);
+			padding: 24px 28px 20px;
+			text-align: center;
+			color: white;
+		}
+		#pron-header h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+		#pron-header p { font-size: 13px; opacity: 0.8; }
+		#pron-body { padding: 20px 20px; }
+
+		/* ── Lista de partidos ── */
+		.partido-row {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			width: 100%;
+			background: #f7faf8;
+			border: 1px solid #e7eee9;
+			border-radius: 12px;
+			padding: 10px 14px;
+			margin-bottom: 9px;
+			text-decoration: none !important;
+			color: #333 !important;
+			cursor: pointer;
+		}
+		.partido-row:hover { background: #eef5f0; }
+		.partido-row .fase {
+			flex: 0 0 100%;
+			font-size: 11px;
+			color: #1a6e4a;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.4px;
+			margin-bottom: 4px;
+		}
+		.partido-teams {
+			display: flex;
+			align-items: center;
+			width: 100%;
+			gap: 8px;
+		}
+		.partido-teams .equipo {
+			flex: 1 1 0;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			min-width: 0;
+		}
+		.partido-teams .equipo.der { justify-content: flex-end; }
+		.partido-teams .equipo img { width: 26px; height: auto; }
+		.partido-teams .equipo span {
+			font-size: 14px; font-weight: 600;
+			overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		}
+		.partido-teams .vs {
+			flex: 0 0 auto; font-size: 13px; color: #888; font-weight: 700;
+			padding: 0 4px;
+		}
+		.partido-teams .marcador-real {
+			flex: 0 0 auto;
+			background: #1a6e4a; color: #fff; font-weight: 700;
+			border-radius: 8px; padding: 4px 10px; font-size: 14px;
+		}
+		.badge-jugado {
+			display:inline-block; font-size:10px; font-weight:700;
+			background:#1a6e4a; color:#fff; border-radius:10px;
+			padding:2px 8px; margin-left:8px; vertical-align:middle;
+		}
+
+		/* ── Detalle ── */
+		.detalle-header { text-align:center; margin-bottom: 16px; }
+		.detalle-header .teams {
+			display:flex; align-items:center; justify-content:center; gap:12px;
+			font-size:18px; font-weight:700;
+		}
+		.detalle-header .teams img { width:34px; height:auto; }
+		.detalle-resultado {
+			margin-top:10px; font-size:15px; font-weight:700; color:#1a6e4a;
+		}
+		.simulador-box {
+			background:#f0f5f2; border-radius:12px; padding:16px;
+			text-align:center; margin-bottom:18px;
+		}
+		.simulador-box .titulo { font-size:13px; font-weight:700; color:#0d4f6e; margin-bottom:10px; }
+		.simulador-box .inputs { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px; }
+		.simulador-box .inputs input {
+			width:46px !important; text-align:center; font-size:18px !important;
+			font-weight:700; padding:6px !important;
+		}
+		.simulador-box .inputs .guion { font-size:20px; font-weight:700; color:#555; }
+		.simulador-nota { font-size:11px; color:#777; margin-top:6px; line-height:1.4; }
+
+		.pron-item {
+			display:flex; align-items:center; justify-content:space-between;
+			border:1px solid #e7eee9; border-radius:10px;
+			padding:9px 14px; margin-bottom:8px; background:#fff;
+		}
+		.pron-item .jug { font-size:14px; font-weight:600; color:#333; }
+		.pron-item .marc {
+			font-size:15px; font-weight:700; border-radius:8px;
+			padding:4px 12px; min-width:52px; text-align:center;
+			background:#eceff1; color:#333;
+		}
+		.pron-item.pron-verde .marc    { background:#A9F5BC; color:#1b5e20; }
+		.pron-item.pron-amarillo .marc { background:#F5DA81; color:#7a5c00; }
+		.pron-item.pron-rojo .marc     { background:#F5BCA9; color:#8a2a14; }
+
+		.leyenda { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin:12px 0 4px; font-size:11px; color:#555; }
+		.leyenda span { display:inline-flex; align-items:center; gap:5px; }
+		.leyenda i { width:14px; height:14px; border-radius:3px; display:inline-block; }
+		.leyenda .lv { background:#A9F5BC; }
+		.leyenda .la { background:#F5DA81; }
+		.leyenda .lr { background:#F5BCA9; }
+
+		.pron-empty { text-align:center; color:#999; padding:24px 10px; font-size:14px; }
+		.btn-bar { text-align:center; margin-top:18px; }
+
+		@media (max-width: 480px) {
+			#pron-wrapper { padding: 0; }
+			#pron-card { border-radius: 0; }
+			#pron-body { padding: 14px 12px; }
+			.partido-teams .equipo span { font-size:13px; }
+		}
+	</style>
+</h:head>
+
+<h:body>
+	<p:growl autoUpdate="true" />
+	<div id="pron-wrapper">
+		<div id="pron-card">
+
+			<div id="pron-header">
+				<span style="font-size:40px;display:block;margin-bottom:6px;">&#9917;</span>
+				<h1>Pronósticos por partido</h1>
+				<p>Copa Mundial FIFA 2026</p>
+			</div>
+
+			<div id="pron-body">
+				<h:form id="mainForm">
+
+					<!-- ═══════════════ VISTA 1: LISTA DE PARTIDOS ═══════════════ -->
+					<h:panelGroup layout="block" rendered="#{empty bean_Pronosticos.seleccionado}">
+
+						<ui:repeat var="par" value="#{bean_Pronosticos.partidos}">
+							<p:commandLink styleClass="partido-row"
+								process="@this" update="mainForm"
+								actionListener="#{bean_Pronosticos.seleccionar(par)}">
+								<span class="fase">
+									#{bean_Pronosticos.getNombreFase(par)}
+									<h:outputText styleClass="badge-jugado" rendered="#{par.realizado}" value="Jugado" />
+								</span>
+								<span class="partido-teams">
+									<span class="equipo">
+										<h:graphicImage alt="img" library="images" rendered="#{not empty par.eq1}"
+											name="#{par.eq1.atributos['nombre'].replace(' ','_')}.png" />
+										<span>#{bean_Pronosticos.getNombreEq1(par)}</span>
+									</span>
+									<h:panelGroup rendered="#{par.realizado}">
+										<span class="marcador-real">#{par.goles1} - #{par.goles2}</span>
+									</h:panelGroup>
+									<h:panelGroup rendered="#{not par.realizado}">
+										<span class="vs">vs</span>
+									</h:panelGroup>
+									<span class="equipo der">
+										<span>#{bean_Pronosticos.getNombreEq2(par)}</span>
+										<h:graphicImage alt="img" library="images" rendered="#{not empty par.eq2}"
+											name="#{par.eq2.atributos['nombre'].replace(' ','_')}.png" />
+									</span>
+								</span>
+							</p:commandLink>
+						</ui:repeat>
+
+					</h:panelGroup>
+
+					<!-- ═══════════════ VISTA 2: DETALLE DEL PARTIDO ═══════════════ -->
+					<h:panelGroup layout="block" rendered="#{not empty bean_Pronosticos.seleccionado}">
+
+						<p:commandButton value="Volver a partidos" icon="pi pi-arrow-left"
+							styleClass="ui-button-flat" process="@this" update="mainForm"
+							actionListener="#{bean_Pronosticos.volver}" />
+
+						<div class="detalle-header" style="margin-top:14px;">
+							<div class="fase" style="color:#1a6e4a;font-weight:700;font-size:12px;text-transform:uppercase;margin-bottom:8px;">
+								#{bean_Pronosticos.getNombreFase(bean_Pronosticos.seleccionado)}
+							</div>
+							<div class="teams">
+								<h:graphicImage alt="img" library="images" rendered="#{not empty bean_Pronosticos.seleccionado.eq1}"
+									name="#{bean_Pronosticos.seleccionado.eq1.atributos['nombre'].replace(' ','_')}.png" />
+								<span>#{bean_Pronosticos.getNombreEq1(bean_Pronosticos.seleccionado)}</span>
+								<span style="color:#888;">vs</span>
+								<span>#{bean_Pronosticos.getNombreEq2(bean_Pronosticos.seleccionado)}</span>
+								<h:graphicImage alt="img" library="images" rendered="#{not empty bean_Pronosticos.seleccionado.eq2}"
+									name="#{bean_Pronosticos.seleccionado.eq2.atributos['nombre'].replace(' ','_')}.png" />
+							</div>
+							<h:panelGroup rendered="#{bean_Pronosticos.jugado}">
+								<div class="detalle-resultado">
+									Resultado real: #{bean_Pronosticos.seleccionado.goles1} - #{bean_Pronosticos.seleccionado.goles2}
+								</div>
+							</h:panelGroup>
+						</div>
+
+						<!-- Simulador: solo si el partido NO se ha jugado -->
+						<h:panelGroup rendered="#{not bean_Pronosticos.jugado}">
+							<div class="simulador-box">
+								<div class="titulo">Simulador de resultado</div>
+								<div class="inputs">
+									<p:inputText value="#{bean_Pronosticos.simGoles1}" size="2"
+										onclick="this.setSelectionRange(0,this.value.length)" />
+									<span class="guion">-</span>
+									<p:inputText value="#{bean_Pronosticos.simGoles2}" size="2"
+										onclick="this.setSelectionRange(0,this.value.length)" />
+								</div>
+								<p:commandButton value="Simular" icon="pi pi-play"
+									process="@form" update="mainForm"
+									actionListener="#{bean_Pronosticos.simular}" />
+								<div class="simulador-nota">
+									Ingresa un marcador y verás quién le acierta. El partido aún no se ha jugado.
+								</div>
+							</div>
+						</h:panelGroup>
+
+						<!-- Leyenda de colores -->
+						<h:panelGroup rendered="#{bean_Pronosticos.mostrarColores}">
+							<div class="leyenda">
+								<span><i class="lv"></i> Marcador exacto</span>
+								<span><i class="la"></i> Acierta ganador/empate</span>
+								<span><i class="lr"></i> Falla</span>
+							</div>
+						</h:panelGroup>
+
+						<!-- Lista de pronósticos -->
+						<ui:repeat var="pron" value="#{bean_Pronosticos.pronosticos}">
+							<div class="pron-item #{bean_Pronosticos.getColor(pron)}">
+								<span class="jug">#{bean_Pronosticos.getNombreUsuario(pron)}</span>
+								<span class="marc">#{pron.goles1} - #{pron.goles2}</span>
+							</div>
+						</ui:repeat>
+
+						<h:panelGroup rendered="#{empty bean_Pronosticos.pronosticos}">
+							<div class="pron-empty">Ningún jugador tiene pronóstico para este partido.</div>
+						</h:panelGroup>
+
+					</h:panelGroup>
+
+					<div class="btn-bar">
+						<p:button value="Inicio" icon="pi pi-home" href="index.xhtml" />
+					</div>
+
+				</h:form>
+			</div>
+		</div>
+	</div>
+</h:body>
+</html>

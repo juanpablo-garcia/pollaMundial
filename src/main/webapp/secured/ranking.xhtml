@@ -41,11 +41,24 @@
 				<p:ajax event="tabChange" oncomplete="initRankingChart()" />
 
 				<!-- ══════════════════════════════════════════
+				     PESTAÑA: GRÁFICA (primera)
+				     ══════════════════════════════════════════ -->
+				<p:tab title="Gráfica">
+					<h:form id="chartForm" style="display:none">
+						<h:inputHidden id="chartJson" value="#{bean_Ranking.chartDataJson}" />
+					</h:form>
+					<div id="rankingChartWrapper"
+						style="position:relative;width:100%;height:500px;">
+						<canvas id="rankingChart"></canvas>
+					</div>
+				</p:tab>
+
+				<!-- ══════════════════════════════════════════
 				     PESTAÑA: FIXTURE
 				     ══════════════════════════════════════════ -->
 				<p:tab title="Fixture">
 					<h:form>
-						<p:dataTable reflow="true" var="pgrupo"
+						<p:dataTable var="pgrupo"
 							value="#{bean_Ranking.partidosReales}" styleClass="ranking-table">
 							<p:column>
 								<h:graphicImage alt="img" library="images"
@@ -84,16 +97,6 @@
 							</p:columns>
 						</p:dataTable>
 					</h:form>
-				</p:tab>
-
-				<!-- ══════════════════════════════════════════
-				     PESTAÑA: GRÁFICA
-				     ══════════════════════════════════════════ -->
-				<p:tab title="Gráfica">
-					<h:form id="chartForm" style="display:none">
-						<h:inputHidden id="chartJson" value="#{bean_Ranking.chartDataJson}" />
-					</h:form>
-					<canvas id="rankingChart" style="width:100%;height:500px;"></canvas>
 				</p:tab>
 
 			</p:tabView>

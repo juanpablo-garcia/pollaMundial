@@ -48,6 +48,8 @@ public class Bean_Ranking implements Serializable {
 	private List<Partido> partidosReales = new ArrayList<>();
 	private Set<String> columnas;
 	private BarChartModel horizontalBarModel;
+	// Nombre del usuario "real" (resultados oficiales); se excluye de la gráfica
+	private String realNombre;
 
 	public Bean_Ranking() {
 		super();
@@ -59,6 +61,7 @@ public class Bean_Ranking implements Serializable {
 		columnas = new HashSet<>();
 		if (!ureal.isEmpty()) {
 			Usuario u = ureal.get(0);
+			this.realNombre = (String) u.getAtributos().get("nombre");
 			this.partidosReales = usuarioPartidoDao.getPartidosRanking(u);
 			for (Partido p : this.partidosReales) {
 				ArrayList<Partido> ls = (ArrayList<Partido>) p.getAtributos().get("partidos_usuario");
@@ -160,12 +163,280 @@ public class Bean_Ranking implements Serializable {
 	private LinkedHashMap<String, Integer> buildResultados() {
 		HashMap<String, Integer> hm1 = new LinkedHashMap<>();
 		for (String key : columnas) {
+			// El "real" (resultados oficiales) no se grafica para no descuadrar la escala
+			if (realNombre != null && realNombre.equals(key)) {
+				continue;
+			}
 			hm1.putIfAbsent(key, 0);
 			for (Partido preal : partidosReales) {
 				hm1.put(key, hm1.get(key) + getResultadoNumerico(key, preal));
 			}
 		}
 		return sortByValue(hm1);
+	}
+
+	/**
+	 * Lista de jugadores ordenada por puntaje (mayor a menor), excluyendo al
+	 * usuario de resultados oficiales. Pensada para vistas publicas en tarjetas.
+	 */
+	public List<Map.Entry<String, Integer>> getRanking() {
+		return new ArrayList<>(buildResultados().entrySet());
+	}
+
+	// ─────────────────────────────────────────────────────────────
+	// Detalle por jugador: como consiguio sus puntos
+	// ─────────────────────────────────────────────────────────────
+
+	private String jugadorSeleccionado;
+
+	public void seleccionarJugador(String nombre) {
+		this.jugadorSeleccionado = nombre;
+	}
+
+	public void limpiarJugador() {
+		this.jugadorSeleccionado = null;
+	}
+
+	public String getJugadorSeleccionado() {
+		return jugadorSeleccionado;
+	}
+
+	public Integer getTotalJugador() {
+		if (jugadorSeleccionado == null) {
+			return new Integer(0);
+		}
+		int total = 0;
+		for (Partido preal : partidosReales) {
+			total += getResultadoNumerico(jugadorSeleccionado, preal);
+		}
+		return new Integer(total);
+	}
+
+	/**
+	 * Desglose de los partidos en los que el jugador seleccionado sumo puntos:
+	 * marcadores acertados y equipos que clasificaron.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<DetallePartido> getDetalleJugador() {
+		List<DetallePartido> detalle = new ArrayList<>();
+		if (jugadorSeleccionado == null) {
+			return detalle;
+		}
+
+		// Paso 1: equipos que el jugador pronostico correctamente para que avanzaran
+		// de fase. Los puntos se guardan en el slot del bracket del jugador, pero el
+		// nombre del equipo acertado es un equipo que realmente clasifico. Se indexa
+		// por nombre de equipo para poder mostrarlo bajo el partido real en el que ese
+		// equipo juega (no bajo el slot del bracket del jugador, que puede diferir).
+		Map<String, Integer> puntosPorEquipoAcertado = new HashMap<>();
+		for (Partido preal : partidosReales) {
+			Partido pred = prediccionDe(preal);
+			if (pred == null) {
+				continue;
+			}
+			Integer ptsEq1 = (Integer) pred.getAtributos().get("puntajeeq1");
+			Integer ptsEq2 = (Integer) pred.getAtributos().get("puntajeeq2");
+			if (ptsEq1 != null && ptsEq1 > 0 && pred.getEq1() != null) {
+				puntosPorEquipoAcertado.put((String) pred.getEq1().getAtributos().get("nombre"), ptsEq1);
+			}
+			if (ptsEq2 != null && ptsEq2 > 0 && pred.getEq2() != null) {
+				puntosPorEquipoAcertado.put((String) pred.getEq2().getAtributos().get("nombre"), ptsEq2);
+			}
+		}
+
+		// Paso 2: por cada partido real, el marcador se evalua sobre el mismo slot del
+		// jugador, y los equipos acertados son los equipos REALES de ese partido que
+		// el jugador pronostico que clasificarian (asi el nombre corresponde al
+		// partido mostrado). Se recorre en orden de numero de partido.
+		List<Partido> ordenados = new ArrayList<>(partidosReales);
+		ordenados.sort(Comparator.comparingInt(this::numeroPartido));
+		for (Partido preal : ordenados) {
+			Partido pred = prediccionDe(preal);
+			if (pred == null) {
+				continue;
+			}
+
+			Integer ptsMarcador = (Integer) pred.getAtributos().get("puntaje");
+			int marcador = ptsMarcador == null ? 0 : ptsMarcador;
+
+			List<String> equiposAcertados = new ArrayList<>();
+			int equipos = 0;
+			for (co.com.tmsolutions.model.Equipo eqReal : java.util.Arrays.asList(preal.getEq1(), preal.getEq2())) {
+				if (eqReal == null) {
+					continue;
+				}
+				String nombre = (String) eqReal.getAtributos().get("nombre");
+				Integer pts = puntosPorEquipoAcertado.get(nombre);
+				if (pts != null && pts > 0) {
+					equiposAcertados.add(nombre);
+					equipos += pts;
+				}
+			}
+
+			// Solo interesa lo que aporto puntos al total
+			if (marcador + equipos <= 0) {
+				continue;
+			}
+
+			DetallePartido d = new DetallePartido();
+			d.fase = nombreFase(preal);
+			d.eq1 = nombreEquipo(preal.getEq1(), (String) preal.getAtributos().get("eq1"));
+			d.eq2 = nombreEquipo(preal.getEq2(), (String) preal.getAtributos().get("eq2"));
+			d.realizado = Boolean.TRUE.equals(preal.getRealizado());
+			d.resultadoReal = preal.getGoles1() + " - " + preal.getGoles2();
+			d.prediccion = pred.getGoles1() + " - " + pred.getGoles2();
+			d.ptsMarcador = marcador;
+			d.ptsEquipos = equipos;
+			d.total = marcador + equipos;
+			d.exacto = d.realizado && pred.getGoles1().equals(preal.getGoles1())
+					&& pred.getGoles2().equals(preal.getGoles2());
+			d.equiposAcertados = equiposAcertados;
+
+			detalle.add(d);
+		}
+		return detalle;
+	}
+
+	/**
+	 * Pronostico del jugador seleccionado para el slot del partido real dado.
+	 */
+	@SuppressWarnings("unchecked")
+	private Partido prediccionDe(Partido preal) {
+		ArrayList<Partido> ls = (ArrayList<Partido>) preal.getAtributos().get("partidos_usuario");
+		if (ls == null) {
+			return null;
+		}
+		return ls.stream().filter(o -> jugadorSeleccionado.equals(o.getAtributos().get("nombre_usuario")))
+				.findFirst().orElse(null);
+	}
+
+	/**
+	 * Numero de partido para ordenar el detalle. Grupos: idpartido 0-71 -> 1-72.
+	 * Eliminatorias: el numero va en el atributo "nombre" (r32_73, octavos_89,
+	 * cuartos_97, Semifinal_101...). "tercero y cuarto" = 103 y "final" = 104.
+	 */
+	private int numeroPartido(Partido p) {
+		Object nombreObj = p.getAtributos().get("nombre");
+		String nombre = nombreObj == null ? null : nombreObj.toString();
+		if ("final".equals(nombre)) {
+			return 104;
+		}
+		if ("tercero y cuarto".equals(nombre)) {
+			return 103;
+		}
+		if (nombre != null) {
+			int idx = nombre.lastIndexOf('_');
+			if (idx >= 0 && idx < nombre.length() - 1) {
+				try {
+					return Integer.parseInt(nombre.substring(idx + 1));
+				} catch (NumberFormatException e) {
+					// cae al numero de grupo
+				}
+			}
+		}
+		Integer id = p.getIdpartido();
+		return id == null ? Integer.MAX_VALUE : id + 1;
+	}
+
+	private String nombreEquipo(co.com.tmsolutions.model.Equipo eq, String placeholder) {
+		if (eq != null) {
+			return (String) eq.getAtributos().get("nombre");
+		}
+		return placeholder == null ? "" : placeholder;
+	}
+
+	private String nombreFase(Partido p) {
+		Object nombre = p.getAtributos().get("nombre");
+		if (nombre != null && !"partidos_grupos".equals(p.getFase())) {
+			return nombre.toString();
+		}
+		String fase = p.getFase();
+		if (fase == null) {
+			return "";
+		}
+		switch (fase) {
+		case "partidos_grupos":
+			return "Fase de Grupos";
+		case "ronda32":
+			return "Ronda de 32";
+		case "octavosFinal":
+			return "Octavos de Final";
+		case "cuartosFinal":
+			return "Cuartos de Final";
+		case "semifinales":
+			return "Semifinales";
+		case "finales":
+			return "Finales";
+		default:
+			return fase;
+		}
+	}
+
+	/**
+	 * Estructura de presentacion del desglose de puntos de un partido para un
+	 * jugador. Publica para que pueda leerse desde EL.
+	 */
+	public static class DetallePartido implements Serializable {
+		private static final long serialVersionUID = 1L;
+		private String fase;
+		private String eq1;
+		private String eq2;
+		private boolean realizado;
+		private String resultadoReal;
+		private String prediccion;
+		private int ptsMarcador;
+		private int ptsEquipos;
+		private int total;
+		private boolean exacto;
+		private List<String> equiposAcertados = new ArrayList<>();
+
+		public String getFase() {
+			return fase;
+		}
+
+		public String getEq1() {
+			return eq1;
+		}
+
+		public String getEq2() {
+			return eq2;
+		}
+
+		public boolean isRealizado() {
+			return realizado;
+		}
+
+		public String getResultadoReal() {
+			return resultadoReal;
+		}
+
+		public String getPrediccion() {
+			return prediccion;
+		}
+
+		public int getPtsMarcador() {
+			return ptsMarcador;
+		}
+
+		public int getPtsEquipos() {
+			return ptsEquipos;
+		}
+
+		public int getTotal() {
+			return total;
+		}
+
+		public boolean isExacto() {
+			return exacto;
+		}
+
+		public List<String> getEquiposAcertados() {
+			return equiposAcertados;
+		}
+
+		public String getEquiposAcertadosTexto() {
+			return String.join(", ", equiposAcertados);
+		}
 	}
 
 	public String getChartDataJson() {

@@ -534,12 +534,203 @@ body {
     text-decoration: underline !important;
 }
 
+.jugador-nombre-plano {
+    cursor: default !important;
+}
+
+.jugador-nombre-plano:hover {
+    text-decoration: none !important;
+}
+
+/* Indicador verde/rojo de estado de llenado */
+.jugador-estado {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+.estado-verde { background: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,0.20); }
+.estado-rojo  { background: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.20); }
+
+.jugador-lleno     { border-left: 4px solid #2ecc71 !important; }
+.jugador-pendiente { border-left: 4px solid #e74c3c !important; }
+
+/* Estado de consignación (pago), alineado a la derecha de la fila */
+.jugador-pago {
+    margin-left: auto !important;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+.pago-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.pago-si { background: #d5f5e3; color: #1e8449; }
+.pago-no { background: #fdedec; color: #c0392b; }
+/* Toggle del admin (p:commandLink): clickeable */
+a.pago-toggle { text-decoration: none !important; cursor: pointer !important; }
+a.pago-toggle.pago-no { background: #f4f6f8 !important; color: #7a8694 !important; border: 1px dashed #c3ccd6 !important; }
+a.pago-toggle.pago-si { border: 1px solid #1e8449 !important; }
+a.pago-toggle:hover { filter: brightness(0.95); }
+.jugador-pago .ui-chkbox-box.ui-state-active {
+    background: #2980b9 !important;
+    border-color: #2980b9 !important;
+}
+.jugador-pago label { font-size: 12px !important; color: #555 !important; }
+
+/* ================================================================
+   RESULTADOS — contadores (participantes / llenos / pendientes)
+   ================================================================ */
+.resumen-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.resumen-card {
+    flex: 1 1 110px;
+    background: white;
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-top: 4px solid #0d4f6e;
+}
+.resumen-card.resumen-verde { border-top-color: #2ecc71; }
+.resumen-card.resumen-rojo  { border-top-color: #e74c3c; }
+.resumen-card.resumen-azul  { border-top-color: #2980b9; }
+.resumen-azul .resumen-num  { color: #2980b9; }
+.resumen-num {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a6e4a;
+    line-height: 1.1;
+}
+.resumen-verde .resumen-num { color: #2ecc71; }
+.resumen-rojo  .resumen-num { color: #e74c3c; }
+.resumen-label {
+    display: block;
+    font-size: 12px;
+    color: #777;
+    margin-top: 4px;
+}
+
+/* ================================================================
+   RESULTADOS — pozo de premios
+   ================================================================ */
+.pozo-panel { margin-bottom: 16px !important; }
+.pozo-total {
+    text-align: center;
+    padding: 8px 0 16px;
+    border-bottom: 1px dashed #ddd;
+    margin-bottom: 12px;
+}
+.pozo-total-label {
+    display: block;
+    font-size: 12px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.pozo-total-num {
+    display: block;
+    font-size: 30px;
+    font-weight: 800;
+    color: #1a6e4a;
+}
+.pozo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.pozo-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #eee;
+}
+.pozo-table tr:last-child td { border-bottom: none; }
+.pozo-val {
+    text-align: right;
+    font-weight: 700;
+    color: #1a6e4a;
+    white-space: nowrap;
+}
+.pozo-note {
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+    line-height: 1.5;
+}
+.aviso-bloqueo {
+    background: #fff7e6;
+    border: 1px solid #ffe0a3;
+    color: #8a6d3b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* ================================================================
    RANKING — colores de celdas
    ================================================================ */
 .ranking-verde { background-color: #A9F5BC !important; border-radius: 4px !important; padding: 3px 8px !important; }
 .ranking-amarillo { background-color: #F5DA81 !important; border-radius: 4px !important; padding: 3px 8px !important; }
 .ranking-rojo { background-color: #F5BCA9 !important; border-radius: 4px !important; padding: 3px 8px !important; }
+
+/* ================================================================
+   RANKING — tabla Fixture: ancha y legible (scroll horizontal)
+   En vez de aplastar ~43 columnas al 100% del ancho, dejamos la tabla
+   a su tamaño natural y se desplaza horizontalmente. Cada celda con
+   tamaño y fuente legibles para que se vea el marcador y los puntos.
+   ================================================================ */
+.ranking-table,
+.ranking-table .ui-datatable-tablewrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+.ranking-table table {
+    width: auto !important;
+    min-width: 100% !important;
+}
+/* Celdas y encabezados con aire y sin recortes */
+.ranking-table th.ui-state-default,
+.ranking-table td.ui-widget-content {
+    white-space: nowrap !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+/* Encabezados de columna (nombres de participantes) legibles */
+.ranking-table th.ui-state-default {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    min-width: 70px !important;
+}
+/* Banderas un poco más grandes */
+.ranking-table img {
+    height: 26px !important;
+}
+/* Marcador real destacado */
+.ranking-table .marcador-real {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+/* La celda de cada usuario (marcador + puntos) bien visible */
+.ranking-table td.ui-widget-content .ui-outputlabel {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    display: inline-block !important;
+}
 
 /* ================================================================
    RESPONSIVE
@@ -685,4 +876,82 @@ body {
     padding: 2px 4px !important;
     font-size: 12px;
     border-radius: 3px 3px 0 0;
+}
+
+/* ================================================================
+   MARCADORES EN MÓVIL — todo en una sola línea, SIN scroll horizontal
+   PrimeFaces "reflow" apila cada celda en vertical en pantallas pequeñas.
+   Aquí lo neutralizamos SOLO en las tablas de marcadores (no en
+   "Posiciones Grupos", .tabla-posiciones, que se queda apilada) y compactamos
+   inputs, banderas y nombres para que la fila completa (marcador +
+   tarjetas + equipos) quepa en el ancho del celular. Al no haber scroll
+   horizontal, el deslizar ya no cambia de pestaña en el tabView.
+   ================================================================ */
+@media (max-width: 640px) {
+    /* Sin desplazamiento horizontal: la tabla ocupa el 100% del ancho */
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable,
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable .ui-datatable-tablewrapper {
+        overflow-x: hidden !important;
+    }
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable table {
+        width: 100% !important;
+        table-layout: auto !important;
+    }
+
+    /* Mantener oculto el encabezado (evita que el traductor convierta "G" en
+       "GRAMO" y ensanche la fila) */
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable-reflow .ui-datatable-thead > tr > th {
+        display: none !important;
+    }
+
+    /* Celdas en línea (no apiladas) y compactas */
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable-reflow .ui-datatable-data > tr > td {
+        display: table-cell !important;
+        width: auto !important;
+        float: none !important;
+        clear: none !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+        padding: 4px 1px !important;
+        font-size: 10px !important;
+        border-bottom: 1px solid #f0f2f5 !important;
+    }
+
+    /* Ocultar la etiqueta que reflow inserta delante de cada valor */
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable-reflow .ui-datatable-data > tr > td .ui-column-title {
+        display: none !important;
+    }
+
+    /* Inputs de goles compactos */
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable .ui-inputtext {
+        width: 26px !important;
+        font-size: 13px !important;
+        padding: 4px 1px !important;
+        border-width: 1px !important;
+    }
+
+    /* Inputs de tarjetas (amarilla/roja) aún más pequeños */
+    .panelmarcadores:not(.tabla-posiciones) .card-col { width: 22px !important; }
+    .panelmarcadores:not(.tabla-posiciones) .card-col .ui-inputtext.input-ta,
+    .panelmarcadores:not(.tabla-posiciones) .card-col .ui-inputtext.input-tr {
+        width: 20px !important;
+        font-size: 10px !important;
+        padding: 2px 0 !important;
+    }
+
+    /* Nombres de equipo muy cortos (con elipsis) */
+    .panelmarcadores:not(.tabla-posiciones) .match-team-name {
+        min-width: 0 !important;
+        max-width: 48px !important;
+    }
+    .panelmarcadores:not(.tabla-posiciones) .match-team-name label {
+        font-size: 10px !important;
+        max-width: 48px !important;
+    }
+
+    /* Banderas pequeñas */
+    .panelmarcadores:not(.tabla-posiciones) .ui-datatable img {
+        height: 14px !important;
+    }
 }

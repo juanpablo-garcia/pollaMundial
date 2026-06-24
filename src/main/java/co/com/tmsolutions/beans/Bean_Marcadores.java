@@ -7,8 +7,10 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -69,6 +71,7 @@ public class Bean_Marcadores implements Serializable {
 	private void init() {
 		this.id_user = (String) FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				.get("id");
+		bloquearPronosticosAjenos();
 		GenerarEquipos();
 		cargarPartidoPorUsuario();
 		System.out.println(partidos_grupos);
@@ -84,10 +87,7 @@ public class Bean_Marcadores implements Serializable {
 	}
 
 	private void verificarPuedeEditar() {
-		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("America/Bogota"));
-		c.set(2026, Calendar.JUNE, 11, 13, 0);
-		Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("America/Bogota"));
-		if (c1.compareTo(c) > 0) {
+		if (mundialIniciado()) {
 			canedit = false;
 		}
 		if (this.id_user != null) {
@@ -97,6 +97,36 @@ public class Bean_Marcadores implements Serializable {
 			this.canedit = true;
 		}
 
+	}
+
+	/**
+	 * El mundial inicia el 11 de junio de 2026 a la 1:00 p.m. hora de Bogotá. A
+	 * partir de ese momento se bloquea la edición y se permite ver los pronósticos
+	 * de los demás participantes.
+	 */
+	private boolean mundialIniciado() {
+		Calendar inicio = Calendar.getInstance(TimeZone.getTimeZone("America/Bogota"));
+		inicio.set(2026, Calendar.JUNE, 11, 13, 55, 0);
+		Calendar ahora = Calendar.getInstance(TimeZone.getTimeZone("America/Bogota"));
+		return ahora.compareTo(inicio) > 0;
+	}
+
+	/**
+	 * Nadie puede ver los marcadores de otro participante hasta que inicie el
+	 * mundial. Solo se exceptúan el propio usuario y el administrador.
+	 */
+	private void bloquearPronosticosAjenos() {
+		if (id_user == null) {
+			return;
+		}
+		Usuario actual = bean_User.getUsuario();
+		boolean esAdmin = actual != null && "real@real.com".equals(actual.getMail());
+		boolean esPropio = actual != null && id_user.equals(actual.getId());
+		if (!mundialIniciado() && !esAdmin && !esPropio) {
+			// Se ignora el id solicitado y se muestran los marcadores propios.
+			this.id_user = null;
+			addMessage("Los pronósticos de los demás participantes estarán disponibles cuando inicie el mundial.");
+		}
 	}
 
 	private void cargarPartidoPorUsuario() {
@@ -647,6 +677,12 @@ public class Bean_Marcadores implements Serializable {
 				}
 			}
 		}
+
+		// Reordenar la lista según la posición final (los desempates ajustan el
+		// atributo 'pos' pero no el orden de la lista), para que la tabla de
+		// posiciones se pinte 1°, 2°, 3°, 4°.
+		posiciones.sort((o1, o2) -> ((Integer) o1.getAtributos().get(keypos))
+				.compareTo((Integer) o2.getAtributos().get(keypos)));
 	}
 
 	public void calcularPosiciones() {
@@ -864,52 +900,54 @@ public class Bean_Marcadores implements Serializable {
 			Integer fpB = (Integer) b.getAtributos().get("ta") + 3 * (Integer) b.getAtributos().get("tr");
 			return fpA.compareTo(fpB);
 		});
-		List<Posicion> mejoresTerceros = terceros.stream().collect(Collectors.toList());
-		System.out.println("mejores terceros " + mejoresTerceros);
-//		Mejor Tercero A/B/C/D/F 
-//		Equipo = mejoresTerceros.stream().filter(o-> o.get)
+		// Asignación de los 8 mejores terceros a sus cupos mediante emparejamiento
+		// bipartito (matching de Kuhn), no greedy: garantiza una asignación completa
+		// y determinística. Grupos permitidos por cupo según el bracket oficial
+		// FIFA 2026 (A=0 … L=11).
+		LinkedHashMap<String, List<Integer>> cuposTerceros = new LinkedHashMap<>();
+		cuposTerceros.put("r32_74", Arrays.asList(0, 1, 2, 3, 5)); // 3 A/B/C/D/F
+		cuposTerceros.put("r32_77", Arrays.asList(2, 3, 5, 6, 7)); // 3 C/D/F/G/H
+		cuposTerceros.put("r32_79", Arrays.asList(2, 4, 5, 7, 8)); // 3 C/E/F/H/I
+		cuposTerceros.put("r32_80", Arrays.asList(4, 7, 8, 9, 10)); // 3 E/H/I/J/K
+		cuposTerceros.put("r32_81", Arrays.asList(1, 4, 5, 8, 9)); // 3 B/E/F/I/J
+		cuposTerceros.put("r32_82", Arrays.asList(0, 4, 7, 8, 9)); // 3 A/E/H/I/J
+		cuposTerceros.put("r32_85", Arrays.asList(4, 5, 6, 8, 9)); // 3 E/F/G/I/J
+		cuposTerceros.put("r32_87", Arrays.asList(3, 4, 8, 9, 11)); // 3 D/E/I/J/L
+		Map<String, Equipo> asignacionTerceros = asignarMejoresTerceros(terceros, cuposTerceros);
 
 		// Partidos 1-8: ganadores vs mejores terceros
 		// 2do Grupo A contra 2do Del Grupo B
 		setR32Equipos("r32_73", getEquipoPosicion(0, 2), getEquipoPosicion(1, 2));
 		// 1 del E contra Mejor Tercero A/B/C/D/F
-		setR32Equipos("r32_74", getEquipoPosicion(4, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(0, 1, 2, 3, 5)).getEquipo());
+		setR32Equipos("r32_74", getEquipoPosicion(4, 1), asignacionTerceros.get("r32_74"));
 		// 1 del F contra 2 del C
 		setR32Equipos("r32_75", getEquipoPosicion(5, 1), getEquipoPosicion(2, 2));
 		// 1 Del C contra 2 del F
 		setR32Equipos("r32_76", getEquipoPosicion(2, 1), getEquipoPosicion(5, 2));
 		// 1 del I contra Mejor Tercero C/D/F/G/H
-		setR32Equipos("r32_77", getEquipoPosicion(8, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(2, 3, 5, 6, 7)).getEquipo());
+		setR32Equipos("r32_77", getEquipoPosicion(8, 1), asignacionTerceros.get("r32_77"));
 		// 2 del E conta 2 del I
 		setR32Equipos("r32_78", getEquipoPosicion(4, 2), getEquipoPosicion(8, 2));
 		// 1 del A contra mejor Tercer C/E/F/H/I
-		setR32Equipos("r32_79", getEquipoPosicion(0, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(2, 4, 5, 7, 8)).getEquipo());
+		setR32Equipos("r32_79", getEquipoPosicion(0, 1), asignacionTerceros.get("r32_79"));
 		// 1 del L contra mejor Tercer E/H/I/J/K
-		setR32Equipos("r32_80", getEquipoPosicion(11, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(4, 7, 8, 9, 10)).getEquipo());
+		setR32Equipos("r32_80", getEquipoPosicion(11, 1), asignacionTerceros.get("r32_80"));
 		// 1 del D contra mejor Tercer B/E/F/I/J
-		setR32Equipos("r32_81", getEquipoPosicion(3, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(1, 4, 5, 8, 9)).getEquipo());
+		setR32Equipos("r32_81", getEquipoPosicion(3, 1), asignacionTerceros.get("r32_81"));
 		// 1 del G contra mejor Tercer A/E/H/I/J
-		setR32Equipos("r32_82", getEquipoPosicion(6, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(0, 4, 7, 8, 9)).getEquipo());
+		setR32Equipos("r32_82", getEquipoPosicion(6, 1), asignacionTerceros.get("r32_82"));
 		// 2 Del K contra 2 del L
 		setR32Equipos("r32_83", getEquipoPosicion(10, 2), getEquipoPosicion(11, 2));
 		// 1 del H contra 2 del J
 		setR32Equipos("r32_84", getEquipoPosicion(7, 1), getEquipoPosicion(9, 2));
 		// 1 del B contra mejor Tercer E/F/G/I/J
-		setR32Equipos("r32_85", getEquipoPosicion(1, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(4, 5, 6, 8, 9)).getEquipo());
+		setR32Equipos("r32_85", getEquipoPosicion(1, 1), asignacionTerceros.get("r32_85"));
 
 		// 1 Del J contra 2 del H
 		setR32Equipos("r32_86", getEquipoPosicion(9, 1), getEquipoPosicion(7, 2));
 
 		// 1 del K contra mejor Tercer D/E/I/J/L
-		setR32Equipos("r32_87", getEquipoPosicion(10, 1),
-				extraerMejorTercero(mejoresTerceros, Arrays.asList(3, 4, 8, 9, 11)).getEquipo());
+		setR32Equipos("r32_87", getEquipoPosicion(10, 1), asignacionTerceros.get("r32_87"));
 
 		// 2 del D contra 2 del G
 		setR32Equipos("r32_88", getEquipoPosicion(3, 2), getEquipoPosicion(6, 2));
@@ -917,20 +955,58 @@ public class Bean_Marcadores implements Serializable {
 		calcularOctavos();
 	}
 
-	public static Posicion extraerMejorTercero(List<Posicion> mejoresTerceros, List<Integer> gruposPermitidos) {
-		for (Iterator<Posicion> it = mejoresTerceros.iterator(); it.hasNext();) {
-			Posicion tercero = it.next();
-			Integer grupo = (Integer) tercero.getEquipo().getAtributos().get("grupo");
-			// si el grupo lo guardas con otra llave, cámbiala aquí
+	/**
+	 * Asigna los mejores terceros (por ranking) a sus cupos de la Ronda de 32
+	 * mediante un emparejamiento bipartito (algoritmo de Kuhn) en vez de un greedy.
+	 * Toma los N mejores terceros (N = nº de cupos) y los reparte de forma que cada
+	 * cupo reciba el tercero de un grupo permitido. La FIFA garantiza que esa
+	 * asignación completa siempre existe, así que es determinística y nunca deja
+	 * cupos vacíos (salvo que haya menos terceros que cupos, lo que no ocurre con
+	 * los 12 grupos completos).
+	 *
+	 * @param tercerosOrdenados terceros de cada grupo, ya ordenados de mejor a peor
+	 * @param cuposTerceros      cupo R32 -> grupos permitidos (orden de inserción)
+	 * @return cupo R32 -> equipo tercero asignado (null si no se pudo asignar)
+	 */
+	private Map<String, Equipo> asignarMejoresTerceros(List<Posicion> tercerosOrdenados,
+			LinkedHashMap<String, List<Integer>> cuposTerceros) {
+		List<String> cupos = new ArrayList<>(cuposTerceros.keySet());
+		// Los mejores terceros que clasifican (la lista ya viene ordenada por ranking)
+		int n = Math.min(cupos.size(), tercerosOrdenados.size());
+		List<Integer> gruposClasificados = new ArrayList<>();
+		HashMap<Integer, Equipo> equipoPorGrupo = new HashMap<>();
+		for (int i = 0; i < n; i++) {
+			Posicion p = tercerosOrdenados.get(i);
+			Integer grupo = (Integer) p.getEquipo().getAtributos().get("grupo");
+			gruposClasificados.add(grupo);
+			equipoPorGrupo.put(grupo, p.getEquipo());
+		}
+		// matchCupo[c] = grupo asignado al cupo c (o null)
+		Integer[] matchCupo = new Integer[cupos.size()];
+		for (Integer grupo : gruposClasificados) {
+			boolean[] visit = new boolean[cupos.size()];
+			asignarKuhn(grupo, cupos, cuposTerceros, matchCupo, visit);
+		}
+		Map<String, Equipo> resultado = new LinkedHashMap<>();
+		for (int c = 0; c < cupos.size(); c++) {
+			resultado.put(cupos.get(c), matchCupo[c] != null ? equipoPorGrupo.get(matchCupo[c]) : null);
+		}
+		return resultado;
+	}
 
-			if (gruposPermitidos.contains(grupo)) {
-				it.remove(); // lo saca de la lista
-				System.out.println("si lo encuentra " + tercero.getEquipo().getAtributos());
-				return tercero;
+	/** Busca un camino aumentante para el grupo (algoritmo de Kuhn). */
+	private boolean asignarKuhn(Integer grupo, List<String> cupos,
+			LinkedHashMap<String, List<Integer>> cuposTerceros, Integer[] matchCupo, boolean[] visit) {
+		for (int c = 0; c < cupos.size(); c++) {
+			if (!visit[c] && cuposTerceros.get(cupos.get(c)).contains(grupo)) {
+				visit[c] = true;
+				if (matchCupo[c] == null || asignarKuhn(matchCupo[c], cupos, cuposTerceros, matchCupo, visit)) {
+					matchCupo[c] = grupo;
+					return true;
+				}
 			}
 		}
-		System.out.println("no lo encuentra de los grupos " + gruposPermitidos);
-		return null;
+		return false;
 	}
 
 	private void setR32Equipos(String nombre, Equipo eq1, Equipo eq2) {
