@@ -5,6 +5,10 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyStore;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -13,6 +17,10 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.hibernate.criterion.Restrictions;
 
@@ -215,6 +223,15 @@ public class ResultadosSyncService {
 
 	private JsonNode get(String url) throws IOException {
 		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+		// Liberty usa su propio truststore (key.p12) sin las CA publicas, lo que
+		// rompe el handshake TLS contra sitios publicos como ESPN. Forzamos el uso
+		// del truststore de CA publicas del JDK (cacerts) solo en esta conexion.
+		if (con instanceof HttpsURLConnection) {
+			SSLSocketFactory f = sslSocketFactory();
+			if (f != null) {
+				((HttpsURLConnection) con).setSSLSocketFactory(f);
+			}
+		}
 		con.setRequestMethod("GET");
 		con.setConnectTimeout(8000);
 		con.setReadTimeout(12000);
@@ -224,6 +241,40 @@ public class ResultadosSyncService {
 			return mapper.readTree(in);
 		} finally {
 			con.disconnect();
+		}
+	}
+
+	private volatile SSLSocketFactory sslSocketFactory;
+
+	/**
+	 * SSLSocketFactory que confia en las CA publicas del JDK (cacerts), no en el
+	 * truststore de Liberty. Se cachea. Devuelve null si no se pudo construir (en
+	 * cuyo caso se usa el default del servidor).
+	 */
+	private SSLSocketFactory sslSocketFactory() {
+		SSLSocketFactory f = sslSocketFactory;
+		if (f != null) {
+			return f;
+		}
+		synchronized (this) {
+			if (sslSocketFactory != null) {
+				return sslSocketFactory;
+			}
+			try {
+				Path cacerts = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
+				KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+				try (InputStream in = Files.newInputStream(cacerts)) {
+					ks.load(in, "changeit".toCharArray());
+				}
+				TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+				tmf.init(ks);
+				SSLContext ctx = SSLContext.getInstance("TLS");
+				ctx.init(null, tmf.getTrustManagers(), null);
+				sslSocketFactory = ctx.getSocketFactory();
+			} catch (Exception e) {
+				sslSocketFactory = null;
+			}
+			return sslSocketFactory;
 		}
 	}
 
