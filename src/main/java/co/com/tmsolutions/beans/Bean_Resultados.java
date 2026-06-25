@@ -177,7 +177,14 @@ public class Bean_Resultados implements Serializable {
 			addMensaje(FacesMessage.SEVERITY_WARN, "Solo el administrador puede sincronizar resultados.");
 			return;
 		}
-		ResultadosSyncService.ResultadoSync r = resultadosSyncService.sincronizar();
+		ResultadosSyncService.ResultadoSync r;
+		try {
+			r = resultadosSyncService.sincronizar();
+		} catch (Exception e) {
+			addMensaje(FacesMessage.SEVERITY_ERROR, "Error al sincronizar: " + e.getClass().getSimpleName()
+					+ (e.getMessage() != null ? " - " + e.getMessage() : ""));
+			return;
+		}
 		if (r.error != null) {
 			addMensaje(FacesMessage.SEVERITY_ERROR, r.error);
 			return;

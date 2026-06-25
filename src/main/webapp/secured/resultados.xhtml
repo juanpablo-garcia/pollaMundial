@@ -57,9 +57,13 @@
 			<!-- Sincronización de resultados oficiales (solo admin) -->
 			<h:panelGroup layout="block" rendered="#{bean_Resultados.admin}"
 				style="text-align:center; margin-bottom:16px;">
-				<p:commandButton value="Sincronizar resultados (ESPN)" icon="pi pi-refresh"
-					actionListener="#{bean_Resultados.sincronizarResultados}" update="contenido"
-					styleClass="ui-button-help" />
+				<p:commandButton widgetVar="syncBtn" value="Sincronizar resultados (ESPN)"
+					icon="pi pi-refresh" action="#{bean_Resultados.sincronizarResultados()}"
+					update="contenido" styleClass="ui-button-help"
+					onstart="PF('syncBtn').disable()" oncomplete="PF('syncBtn').enable()" />
+				<div style="font-size:12px; color:#888; margin-top:6px;">
+					Re-sincroniza los marcadores ingresados a mano; los que ya trajo la API no se tocan.
+				</div>
 			</h:panelGroup>
 
 			<!-- Pozo y premios (solo polla, no polla-tm) -->

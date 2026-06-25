@@ -28,10 +28,11 @@ import co.com.tmsolutions.model.Usuario;
 
 /**
  * Sincroniza los resultados oficiales (usuario real@real.com) consultando la API
- * publica no oficial de ESPN. Cada partido se actualiza una sola vez: solo se
- * tocan los que aun NO estan marcados como realizados y cuyos dos equipos ya
- * estan definidos (para eliminatorias eso implica que el bracket del real ya fue
- * armado). Tras actualizar, dispara el recalculo de puntajes de todos.
+ * publica no oficial de ESPN. Se actualizan los partidos terminados cuyos dos
+ * equipos ya estan definidos y que NO hayan sido cargados antes por la API
+ * (atributo origen=api): es decir, los ingresados a mano se re-sincronizan
+ * (sobreescriben) con el dato oficial, y los que ya puso la API no se re-tocan.
+ * Tras actualizar, dispara el recalculo de puntajes de todos.
  *
  * No requiere API key. El emparejamiento con cada Partido se hace por el par de
  * equipos (no por numero de partido), traduciendo el nombre EN->ES.
@@ -119,7 +120,8 @@ public class ResultadosSyncService {
 
 		Partido p = buscarPartido(partidos, esA, esB);
 		if (p == null) {
-			// Ya estaba realizado, o el bracket todavia no tiene a estos equipos.
+			// Ya fue cargado por la API (origen=api, no se re-toca), o el bracket
+			// todavia no tiene a estos equipos.
 			return false;
 		}
 
@@ -140,6 +142,9 @@ public class ResultadosSyncService {
 		}
 
 		p.setRealizado(Boolean.TRUE);
+		// Marca el partido como cargado por la API: en proximas sincronizaciones
+		// no se vuelve a tocar (solo se re-sincronizan los ingresados a mano).
+		p.getAtributos().put("origen", "api");
 		r.actualizados.add(esA + " " + golA + " - " + golB + " " + esB);
 		return true;
 	}
@@ -187,7 +192,9 @@ public class ResultadosSyncService {
 	 */
 	private Partido buscarPartido(List<Partido> partidos, String esA, String esB) {
 		for (Partido p : partidos) {
-			if (Boolean.TRUE.equals(p.getRealizado())) {
+			// Los ya cargados por la API no se re-sincronizan; los manuales o
+			// pendientes si (se sobreescriben con el dato oficial de ESPN).
+			if ("api".equals(p.getAtributos().get("origen"))) {
 				continue;
 			}
 			String n1 = nombre(p.getEq1());
