@@ -1,6 +1,7 @@
 package co.com.tmsolutions.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,11 @@ import co.com.tmsolutions.model.Usuario;
 
 @Stateless
 public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
+
+	// Slots de la Ronda de 32 que hospedan a un mejor tercero (el tercero es el
+	// eq2 en estos partidos, ver Bean_Marcadores.calcularRonda32).
+	private static final Set<String> SLOTS_TERCEROS = new HashSet<>(Arrays.asList("r32_74", "r32_77", "r32_79",
+			"r32_80", "r32_81", "r32_82", "r32_85", "r32_87"));
 
 	/**
 	 * Devuelve el {@link PartidosUsuario} (gestionado) de un usuario, o null si no
@@ -352,6 +358,15 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 			}
 		}
 
+		// Los mejores terceros solo son seguros cuando TODOS los grupos terminaron:
+		// un tercero provisional puede ser desplazado al cerrar otro grupo. En los
+		// slots que hospedan terceros el equipo real es el eq2; si aun no terminan
+		// los 12 grupos, esos puntos no se otorgan todavia (los 1.os/2.os si).
+		boolean todosGruposTerminaron = terminoGrupo != null && terminoGrupo.size() == 12
+				&& terminoGrupo.values().stream().allMatch(Boolean.TRUE::equals);
+		boolean terceroIncierto = SLOTS_TERCEROS.contains(preal.getAtributos().get("nombre"))
+				&& !todosGruposTerminaron;
+
 		if (preal.getEq1() != null) {
 			if (eq1 != null && preal.getEq1().getAtributos().get("nombre").equals(eq1.getAtributos().get("nombre"))) {
 				pusuario.getAtributos().put("puntajeeq1", puntaje);
@@ -360,7 +375,7 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 				pusuario.getAtributos().put("puntajeeq2", puntaje);
 			}
 		}
-		if (preal.getEq2() != null) {
+		if (preal.getEq2() != null && !terceroIncierto) {
 			if (eq1 != null && preal.getEq2().getAtributos().get("nombre").equals(eq1.getAtributos().get("nombre"))) {
 				pusuario.getAtributos().put("puntajeeq1", puntaje);
 			}
