@@ -97,8 +97,12 @@ public class ResultadosSyncService {
 
 		if (huboCambios) {
 			usuarioPartidoDao.save(pu);
-			usuarioPartidoDao.calcularResultados(real);
 		}
+		// Recalcula siempre (aunque no haya cambios nuevos) para aplicar las reglas
+		// de puntaje vigentes sobre los resultados ya cargados (p.ej. el bloqueo de
+		// los terceros hasta que terminen todos los grupos).
+		usuarioPartidoDao.calcularResultados(real);
+		r.recalculado = true;
 		return r;
 	}
 
@@ -284,6 +288,7 @@ public class ResultadosSyncService {
 		public final List<String> actualizados = new ArrayList<>();
 		public final List<String> sinMapeo = new ArrayList<>();
 		public final List<String> fechasConError = new ArrayList<>();
+		public boolean recalculado;
 		public String error;
 	}
 }

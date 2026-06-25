@@ -191,6 +191,9 @@ public class Bean_Resultados implements Serializable {
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(r.actualizados.size()).append(" partido(s) actualizado(s).");
+		if (r.recalculado) {
+			sb.append(" Puntajes recalculados.");
+		}
 		if (!r.sinMapeo.isEmpty()) {
 			sb.append(" Sin emparejar (revisar nombres): ").append(String.join("; ", r.sinMapeo)).append('.');
 		}
