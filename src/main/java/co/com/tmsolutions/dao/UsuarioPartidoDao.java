@@ -15,6 +15,7 @@ import co.com.tmsolutions.model.Equipo;
 import co.com.tmsolutions.model.Partido;
 import co.com.tmsolutions.model.PartidosUsuario;
 import co.com.tmsolutions.model.Usuario;
+import co.com.tmsolutions.service.CalculadoraBracket;
 
 @Stateless
 public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
@@ -67,6 +68,34 @@ public class UsuarioPartidoDao extends GenericDAOJPA<PartidosUsuario, String> {
 			}
 		}
 		return ids;
+	}
+
+	/**
+	 * Recalcula, para TODOS los pronósticos (todos los jugadores y el real), los
+	 * equipos del bracket eliminatorio a partir de los marcadores ya cargados, usando
+	 * la asignación de mejores terceros corregida (tabla oficial Anexo C). Solo cambian
+	 * los nombres de los equipos de cada cruce; los marcadores (goles/penales/tarjetas)
+	 * NO se tocan. Al terminar recalcula los puntajes.
+	 *
+	 * <p>Pensado para dispararse una vez desde la vista del usuario real cuando cambia
+	 * la lógica de cálculo del bracket.
+	 *
+	 * @return cantidad de pronósticos recalculados
+	 */
+	public int recalcularBrackets(Usuario usuarioreal) {
+		List<PartidosUsuario> todos = findAll();
+		int n = 0;
+		for (PartidosUsuario pu : todos) {
+			if (pu.getPartidos() == null || pu.getPartidos().isEmpty()) {
+				continue;
+			}
+			new CalculadoraBracket().recalcular(pu.getPartidos());
+			pu.setFechaModificacion(new Date());
+			save(pu);
+			n++;
+		}
+		calcularResultados(usuarioreal);
+		return n;
 	}
 
 	public void calcularResultados(Usuario usuarioreal) {

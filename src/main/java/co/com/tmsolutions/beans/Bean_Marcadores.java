@@ -219,6 +219,21 @@ public class Bean_Marcadores implements Serializable {
 
 	}
 
+	/**
+	 * Acción solo para el usuario real: recorre TODOS los jugadores y vuelve a calcular
+	 * los equipos del bracket (cruce de mejores terceros y avance hasta la final) a
+	 * partir de los marcadores ya cargados, sin modificar ningún marcador. Luego
+	 * recalcula los puntajes de todos.
+	 */
+	public void recalcularTercerosTodos() {
+		if (bean_User.getUsuario() == null || !"real@real.com".equals(bean_User.getUsuario().getMail())) {
+			addMessage("Solo el usuario real puede recalcular los cruces.");
+			return;
+		}
+		int n = usuarioPartidoDao.recalcularBrackets(bean_User.getUsuario());
+		addMessage("Cruces recalculados para " + n + " pronósticos. Recarga la página para ver los cambios.");
+	}
+
 	private void addMessage(String ms) {
 		FacesMessage message = new FacesMessage(ms, "");
 		PrimeFacesContext.getCurrentInstance().addMessage(null, message);
@@ -873,6 +888,92 @@ public class Bean_Marcadores implements Serializable {
 		}
 	}
 
+	/**
+	 * Cupos de la Ronda de 32 que reciben un mejor tercero, en el MISMO orden que
+	 * las columnas de la tabla oficial FIFA: 1A, 1B, 1D, 1E, 1G, 1I, 1K, 1L.
+	 */
+	private static final String[] CUPOS_TERCEROS_ORDEN = { "r32_79", "r32_85", "r32_81", "r32_74", "r32_82", "r32_77",
+			"r32_87", "r32_80" };
+
+	/**
+	 * Tabla oficial del Anexo C del reglamento FIFA 2026: las 495 combinaciones de
+	 * los 8 grupos que clasifican un tercero. Cada entrada tiene 16 caracteres: los
+	 * 8 primeros son las letras (ordenadas) de los grupos cuyo tercero clasifica, y
+	 * los 8 siguientes el grupo del tercero asignado a cada ganador, en el orden de
+	 * columnas 1A, 1B, 1D, 1E, 1G, 1I, 1K, 1L (igual que {@link #CUPOS_TERCEROS_ORDEN}).
+	 */
+	private static final String[] ANEXO_C_TERCEROS = {
+			"ABCDEFGHHGBCAFDE", "ABCDEFGICGBDAFEI", "ABCDEFGJCGBDAFEJ", "ABCDEFGKCGBDAFEK", "ABCDEFGLCGBDAFLE", "ABCDEFHIHEBCAFDI", "ABCDEFHJHJBCAFDE", "ABCDEFHKHEBCAFDK",
+			"ABCDEFHLHFBCADLE", "ABCDEFIJCJBDAFEI", "ABCDEFIKCEBDAFIK", "ABCDEFILCEBDAFLI", "ABCDEFJKCJBDAFEK", "ABCDEFJLCJBDAFLE", "ABCDEFKLCEBDAFLK", "ABCDEGHIHGBCADEI",
+			"ABCDEGHJHGBCADEJ", "ABCDEGHKHGBCADEK", "ABCDEGHLHGBCADLE", "ABCDEGIJEGBCADIJ", "ABCDEGIKEGBCADIK", "ABCDEGILEGBCADLI", "ABCDEGJKEGBCADJK", "ABCDEGJLEGBCADLJ",
+			"ABCDEGKLEGBCADLK", "ABCDEHIJHJBCADEI", "ABCDEHIKHEBCADIK", "ABCDEHILHEBCADLI", "ABCDEHJKHJBCADEK", "ABCDEHJLHJBCADLE", "ABCDEHKLHEBCADLK", "ABCDEIJKEJBCADIK",
+			"ABCDEIJLEJBCADLI", "ABCDEIKLEIBCADLK", "ABCDEJKLEJBCADLK", "ABCDFGHIHGBCAFDI", "ABCDFGHJHGBCAFDJ", "ABCDFGHKHGBCAFDK", "ABCDFGHLCGBDAFLH", "ABCDFGIJCGBDAFIJ",
+			"ABCDFGIKCGBDAFIK", "ABCDFGILCGBDAFLI", "ABCDFGJKCGBDAFJK", "ABCDFGJLCGBDAFLJ", "ABCDFGKLCGBDAFLK", "ABCDFHIJHJBCAFDI", "ABCDFHIKHFBCADIK", "ABCDFHILHFBCADLI",
+			"ABCDFHJKHJBCAFDK", "ABCDFHJLCJBDAFLH", "ABCDFHKLHFBCADLK", "ABCDFIJKCJBDAFIK", "ABCDFIJLCJBDAFLI", "ABCDFIKLCIBDAFLK", "ABCDFJKLCJBDAFLK", "ABCDGHIJHGBCADIJ",
+			"ABCDGHIKHGBCADIK", "ABCDGHILHGBCADLI", "ABCDGHJKHGBCADJK", "ABCDGHJLHGBCADLJ", "ABCDGHKLHGBCADLK", "ABCDGIJKCJBDAGIK", "ABCDGIJLCJBDAGLI", "ABCDGIKLIGBCADLK",
+			"ABCDGJKLCJBDAGLK", "ABCDHIJKHJBCADIK", "ABCDHIJLHJBCADLI", "ABCDHIKLHIBCADLK", "ABCDHJKLHJBCADLK", "ABCDIJKLIJBCADLK", "ABCEFGHIHGBCAFEI", "ABCEFGHJHGBCAFEJ",
+			"ABCEFGHKHGBCAFEK", "ABCEFGHLHGBCAFLE", "ABCEFGIJEGBCAFIJ", "ABCEFGIKEGBCAFIK", "ABCEFGILEGBCAFLI", "ABCEFGJKEGBCAFJK", "ABCEFGJLEGBCAFLJ", "ABCEFGKLEGBCAFLK",
+			"ABCEFHIJHJBCAFEI", "ABCEFHIKHEBCAFIK", "ABCEFHILHEBCAFLI", "ABCEFHJKHJBCAFEK", "ABCEFHJLHJBCAFLE", "ABCEFHKLHEBCAFLK", "ABCEFIJKEJBCAFIK", "ABCEFIJLEJBCAFLI",
+			"ABCEFIKLEIBCAFLK", "ABCEFJKLEJBCAFLK", "ABCEGHIJHJBCAGEI", "ABCEGHIKEGBCAHIK", "ABCEGHILEGBCAHLI", "ABCEGHJKHJBCAGEK", "ABCEGHJLHJBCAGLE", "ABCEGHKLEGBCAHLK",
+			"ABCEGIJKEJBCAGIK", "ABCEGIJLEJBCAGLI", "ABCEGIKLEGBAICLK", "ABCEGJKLEJBCAGLK", "ABCEHIJKEJBCAHIK", "ABCEHIJLEJBCAHLI", "ABCEHIKLEIBCAHLK", "ABCEHJKLEJBCAHLK",
+			"ABCEIJKLEJBAICLK", "ABCFGHIJHGBCAFIJ", "ABCFGHIKHGBCAFIK", "ABCFGHILHGBCAFLI", "ABCFGHJKHGBCAFJK", "ABCFGHJLHGBCAFLJ", "ABCFGHKLHGBCAFLK", "ABCFGIJKCJBFAGIK",
+			"ABCFGIJLCJBFAGLI", "ABCFGIKLIGBCAFLK", "ABCFGJKLCJBFAGLK", "ABCFHIJKHJBCAFIK", "ABCFHIJLHJBCAFLI", "ABCFHIKLHIBCAFLK", "ABCFHJKLHJBCAFLK", "ABCFIJKLIJBCAFLK",
+			"ABCGHIJKHJBCAGIK", "ABCGHIJLHJBCAGLI", "ABCGHIKLIGBCAHLK", "ABCGHJKLHJBCAGLK", "ABCGIJKLIJBCAGLK", "ABCHIJKLIJBCAHLK", "ABDEFGHIHGBDAFEI", "ABDEFGHJHGBDAFEJ",
+			"ABDEFGHKHGBDAFEK", "ABDEFGHLHGBDAFLE", "ABDEFGIJEGBDAFIJ", "ABDEFGIKEGBDAFIK", "ABDEFGILEGBDAFLI", "ABDEFGJKEGBDAFJK", "ABDEFGJLEGBDAFLJ", "ABDEFGKLEGBDAFLK",
+			"ABDEFHIJHJBDAFEI", "ABDEFHIKHEBDAFIK", "ABDEFHILHEBDAFLI", "ABDEFHJKHJBDAFEK", "ABDEFHJLHJBDAFLE", "ABDEFHKLHEBDAFLK", "ABDEFIJKEJBDAFIK", "ABDEFIJLEJBDAFLI",
+			"ABDEFIKLEIBDAFLK", "ABDEFJKLEJBDAFLK", "ABDEGHIJHJBDAGEI", "ABDEGHIKEGBDAHIK", "ABDEGHILEGBDAHLI", "ABDEGHJKHJBDAGEK", "ABDEGHJLHJBDAGLE", "ABDEGHKLEGBDAHLK",
+			"ABDEGIJKEJBDAGIK", "ABDEGIJLEJBDAGLI", "ABDEGIKLEGBAIDLK", "ABDEGJKLEJBDAGLK", "ABDEHIJKEJBDAHIK", "ABDEHIJLEJBDAHLI", "ABDEHIKLEIBDAHLK", "ABDEHJKLEJBDAHLK",
+			"ABDEIJKLEJBAIDLK", "ABDFGHIJHGBDAFIJ", "ABDFGHIKHGBDAFIK", "ABDFGHILHGBDAFLI", "ABDFGHJKHGBDAFJK", "ABDFGHJLHGBDAFLJ", "ABDFGHKLHGBDAFLK", "ABDFGIJKFJBDAGIK",
+			"ABDFGIJLFJBDAGLI", "ABDFGIKLIGBDAFLK", "ABDFGJKLFJBDAGLK", "ABDFHIJKHJBDAFIK", "ABDFHIJLHJBDAFLI", "ABDFHIKLHIBDAFLK", "ABDFHJKLHJBDAFLK", "ABDFIJKLIJBDAFLK",
+			"ABDGHIJKHJBDAGIK", "ABDGHIJLHJBDAGLI", "ABDGHIKLIGBDAHLK", "ABDGHJKLHJBDAGLK", "ABDGIJKLIJBDAGLK", "ABDHIJKLIJBDAHLK", "ABEFGHIJHJBFAGEI", "ABEFGHIKEGBFAHIK",
+			"ABEFGHILEGBFAHLI", "ABEFGHJKHJBFAGEK", "ABEFGHJLHJBFAGLE", "ABEFGHKLEGBFAHLK", "ABEFGIJKEJBFAGIK", "ABEFGIJLEJBFAGLI", "ABEFGIKLEGBAIFLK", "ABEFGJKLEJBFAGLK",
+			"ABEFHIJKEJBFAHIK", "ABEFHIJLEJBFAHLI", "ABEFHIKLEIBFAHLK", "ABEFHJKLEJBFAHLK", "ABEFIJKLEJBAIFLK", "ABEGHIJKEJBAHGIK", "ABEGHIJLEJBAHGLI", "ABEGHIKLEGBAIHLK",
+			"ABEGHJKLEJBAHGLK", "ABEGIJKLEJBAIGLK", "ABEHIJKLEJBAIHLK", "ABFGHIJKHJBFAGIK", "ABFGHIJLHJBFAGLI", "ABFGHIKLHGBAIFLK", "ABFGHJKLHJBFAGLK", "ABFGIJKLIJBFAGLK",
+			"ABFHIJKLHJBAIFLK", "ABGHIJKLHJBAIGLK", "ACDEFGHIHGECAFDI", "ACDEFGHJHGJCAFDE", "ACDEFGHKHGECAFDK", "ACDEFGHLHGFCADLE", "ACDEFGIJCGJDAFEI", "ACDEFGIKCGEDAFIK",
+			"ACDEFGILCGEDAFLI", "ACDEFGJKCGJDAFEK", "ACDEFGJLCGJDAFLE", "ACDEFGKLCGEDAFLK", "ACDEFHIJHJECAFDI", "ACDEFHIKHEFCADIK", "ACDEFHILHEFCADLI", "ACDEFHJKHJECAFDK",
+			"ACDEFHJLHJFCADLE", "ACDEFHKLHEFCADLK", "ACDEFIJKCJEDAFIK", "ACDEFIJLCJEDAFLI", "ACDEFIKLCEIDAFLK", "ACDEFJKLCJEDAFLK", "ACDEGHIJHGJCADEI", "ACDEGHIKHGECADIK",
+			"ACDEGHILHGECADLI", "ACDEGHJKHGJCADEK", "ACDEGHJLHGJCADLE", "ACDEGHKLHGECADLK", "ACDEGIJKEGJCADIK", "ACDEGIJLEGJCADLI", "ACDEGIKLEGICADLK", "ACDEGJKLEGJCADLK",
+			"ACDEHIJKHJECADIK", "ACDEHIJLHJECADLI", "ACDEHIKLHEICADLK", "ACDEHJKLHJECADLK", "ACDEIJKLEJICADLK", "ACDFGHIJHGJCAFDI", "ACDFGHIKHGFCADIK", "ACDFGHILHGFCADLI",
+			"ACDFGHJKHGJCAFDK", "ACDFGHJLCGJDAFLH", "ACDFGHKLHGFCADLK", "ACDFGIJKCGJDAFIK", "ACDFGIJLCGJDAFLI", "ACDFGIKLCGIDAFLK", "ACDFGJKLCGJDAFLK", "ACDFHIJKHJFCADIK",
+			"ACDFHIJLHJFCADLI", "ACDFHIKLHFICADLK", "ACDFHJKLHJFCADLK", "ACDFIJKLCJIDAFLK", "ACDGHIJKHGJCADIK", "ACDGHIJLHGJCADLI", "ACDGHIKLHGICADLK", "ACDGHJKLHGJCADLK",
+			"ACDGIJKLIGJCADLK", "ACDHIJKLHJICADLK", "ACEFGHIJHGJCAFEI", "ACEFGHIKHGECAFIK", "ACEFGHILHGECAFLI", "ACEFGHJKHGJCAFEK", "ACEFGHJLHGJCAFLE", "ACEFGHKLHGECAFLK",
+			"ACEFGIJKEGJCAFIK", "ACEFGIJLEGJCAFLI", "ACEFGIKLEGICAFLK", "ACEFGJKLEGJCAFLK", "ACEFHIJKHJECAFIK", "ACEFHIJLHJECAFLI", "ACEFHIKLHEICAFLK", "ACEFHJKLHJECAFLK",
+			"ACEFIJKLEJICAFLK", "ACEGHIJKEGJCAHIK", "ACEGHIJLEGJCAHLI", "ACEGHIKLEGICAHLK", "ACEGHJKLEGJCAHLK", "ACEGIJKLEJICAGLK", "ACEHIJKLEJICAHLK", "ACFGHIJKHGJCAFIK",
+			"ACFGHIJLHGJCAFLI", "ACFGHIKLHGICAFLK", "ACFGHJKLHGJCAFLK", "ACFGIJKLIGJCAFLK", "ACFHIJKLHJICAFLK", "ACGHIJKLHJICAGLK", "ADEFGHIJHGJDAFEI", "ADEFGHIKHGEDAFIK",
+			"ADEFGHILHGEDAFLI", "ADEFGHJKHGJDAFEK", "ADEFGHJLHGJDAFLE", "ADEFGHKLHGEDAFLK", "ADEFGIJKEGJDAFIK", "ADEFGIJLEGJDAFLI", "ADEFGIKLEGIDAFLK", "ADEFGJKLEGJDAFLK",
+			"ADEFHIJKHJEDAFIK", "ADEFHIJLHJEDAFLI", "ADEFHIKLHEIDAFLK", "ADEFHJKLHJEDAFLK", "ADEFIJKLEJIDAFLK", "ADEGHIJKEGJDAHIK", "ADEGHIJLEGJDAHLI", "ADEGHIKLEGIDAHLK",
+			"ADEGHJKLEGJDAHLK", "ADEGIJKLEJIDAGLK", "ADEHIJKLEJIDAHLK", "ADFGHIJKHGJDAFIK", "ADFGHIJLHGJDAFLI", "ADFGHIKLHGIDAFLK", "ADFGHJKLHGJDAFLK", "ADFGIJKLIGJDAFLK",
+			"ADFHIJKLHJIDAFLK", "ADGHIJKLHJIDAGLK", "AEFGHIJKEGJFAHIK", "AEFGHIJLEGJFAHLI", "AEFGHIKLEGIFAHLK", "AEFGHJKLEGJFAHLK", "AEFGIJKLEJIFAGLK", "AEFHIJKLEJIFAHLK",
+			"AEGHIJKLEJIAHGLK", "AFGHIJKLHJIFAGLK", "BCDEFGHICGBDHFEI", "BCDEFGHJHGBCJFDE", "BCDEFGHKCGBDHFEK", "BCDEFGHLCGBDHFLE", "BCDEFGIJCGBDJFEI", "BCDEFGIKCGBDEFIK",
+			"BCDEFGILCGBDEFLI", "BCDEFGJKCGBDJFEK", "BCDEFGJLCGBDJFLE", "BCDEFGKLCGBDEFLK", "BCDEFHIJCJBDHFEI", "BCDEFHIKCEBDHFIK", "BCDEFHILCEBDHFLI", "BCDEFHJKCJBDHFEK",
+			"BCDEFHJLCJBDHFLE", "BCDEFHKLCEBDHFLK", "BCDEFIJKCJBDEFIK", "BCDEFIJLCJBDEFLI", "BCDEFIKLCEBDIFLK", "BCDEFJKLCJBDEFLK", "BCDEGHIJHGBCJDEI", "BCDEGHIKEGBCHDIK",
+			"BCDEGHILEGBCHDLI", "BCDEGHJKHGBCJDEK", "BCDEGHJLHGBCJDLE", "BCDEGHKLEGBCHDLK", "BCDEGIJKEGBCJDIK", "BCDEGIJLEGBCJDLI", "BCDEGIKLEGBCIDLK", "BCDEGJKLEGBCJDLK",
+			"BCDEHIJKEJBCHDIK", "BCDEHIJLEJBCHDLI", "BCDEHIKLEIBCHDLK", "BCDEHJKLEJBCHDLK", "BCDEIJKLEJBCIDLK", "BCDFGHIJHGBCJFDI", "BCDFGHIKCGBDHFIK", "BCDFGHILCGBDHFLI",
+			"BCDFGHJKHGBCJFDK", "BCDFGHJLCGBDHFLJ", "BCDFGHKLCGBDHFLK", "BCDFGIJKCGBDJFIK", "BCDFGIJLCGBDJFLI", "BCDFGIKLCGBDIFLK", "BCDFGJKLCGBDJFLK", "BCDFHIJKCJBDHFIK",
+			"BCDFHIJLCJBDHFLI", "BCDFHIKLCIBDHFLK", "BCDFHJKLCJBDHFLK", "BCDFIJKLCJBDIFLK", "BCDGHIJKHGBCJDIK", "BCDGHIJLHGBCJDLI", "BCDGHIKLHGBCIDLK", "BCDGHJKLHGBCJDLK",
+			"BCDGIJKLIGBCJDLK", "BCDHIJKLHJBCIDLK", "BCEFGHIJHGBCJFEI", "BCEFGHIKEGBCHFIK", "BCEFGHILEGBCHFLI", "BCEFGHJKHGBCJFEK", "BCEFGHJLHGBCJFLE", "BCEFGHKLEGBCHFLK",
+			"BCEFGIJKEGBCJFIK", "BCEFGIJLEGBCJFLI", "BCEFGIKLEGBCIFLK", "BCEFGJKLEGBCJFLK", "BCEFHIJKEJBCHFIK", "BCEFHIJLEJBCHFLI", "BCEFHIKLEIBCHFLK", "BCEFHJKLEJBCHFLK",
+			"BCEFIJKLEJBCIFLK", "BCEGHIJKEJBCHGIK", "BCEGHIJLEJBCHGLI", "BCEGHIKLEGBCIHLK", "BCEGHJKLEJBCHGLK", "BCEGIJKLEJBCIGLK", "BCEHIJKLEJBCIHLK", "BCFGHIJKHGBCJFIK",
+			"BCFGHIJLHGBCJFLI", "BCFGHIKLHGBCIFLK", "BCFGHJKLHGBCJFLK", "BCFGIJKLIGBCJFLK", "BCFHIJKLHJBCIFLK", "BCGHIJKLHJBCIGLK", "BDEFGHIJHGBDJFEI", "BDEFGHIKEGBDHFIK",
+			"BDEFGHILEGBDHFLI", "BDEFGHJKHGBDJFEK", "BDEFGHJLHGBDJFLE", "BDEFGHKLEGBDHFLK", "BDEFGIJKEGBDJFIK", "BDEFGIJLEGBDJFLI", "BDEFGIKLEGBDIFLK", "BDEFGJKLEGBDJFLK",
+			"BDEFHIJKEJBDHFIK", "BDEFHIJLEJBDHFLI", "BDEFHIKLEIBDHFLK", "BDEFHJKLEJBDHFLK", "BDEFIJKLEJBDIFLK", "BDEGHIJKEJBDHGIK", "BDEGHIJLEJBDHGLI", "BDEGHIKLEGBDIHLK",
+			"BDEGHJKLEJBDHGLK", "BDEGIJKLEJBDIGLK", "BDEHIJKLEJBDIHLK", "BDFGHIJKHGBDJFIK", "BDFGHIJLHGBDJFLI", "BDFGHIKLHGBDIFLK", "BDFGHJKLHGBDJFLK", "BDFGIJKLIGBDJFLK",
+			"BDFHIJKLHJBDIFLK", "BDGHIJKLHJBDIGLK", "BEFGHIJKEJBFHGIK", "BEFGHIJLEJBFHGLI", "BEFGHIKLEGBFIHLK", "BEFGHJKLEJBFHGLK", "BEFGIJKLEJBFIGLK", "BEFHIJKLEJBFIHLK",
+			"BEGHIJKLEJIBHGLK", "BFGHIJKLHJBFIGLK", "CDEFGHIJCGJDHFEI", "CDEFGHIKCGEDHFIK", "CDEFGHILCGEDHFLI", "CDEFGHJKCGJDHFEK", "CDEFGHJLCGJDHFLE", "CDEFGHKLCGEDHFLK",
+			"CDEFGIJKCGEDJFIK", "CDEFGIJLCGEDJFLI", "CDEFGIKLCGEDIFLK", "CDEFGJKLCGEDJFLK", "CDEFHIJKCJEDHFIK", "CDEFHIJLCJEDHFLI", "CDEFHIKLCEIDHFLK", "CDEFHJKLCJEDHFLK",
+			"CDEFIJKLCJEDIFLK", "CDEGHIJKEGJCHDIK", "CDEGHIJLEGJCHDLI", "CDEGHIKLEGICHDLK", "CDEGHJKLEGJCHDLK", "CDEGIJKLEGICJDLK", "CDEHIJKLEJICHDLK", "CDFGHIJKCGJDHFIK",
+			"CDFGHIJLCGJDHFLI", "CDFGHIKLCGIDHFLK", "CDFGHJKLCGJDHFLK", "CDFGIJKLCGIDJFLK", "CDFHIJKLCJIDHFLK", "CDGHIJKLHGICJDLK", "CEFGHIJKEGJCHFIK", "CEFGHIJLEGJCHFLI",
+			"CEFGHIKLEGICHFLK", "CEFGHJKLEGJCHFLK", "CEFGIJKLEGICJFLK", "CEFHIJKLEJICHFLK", "CEGHIJKLEJICHGLK", "CFGHIJKLHGICJFLK", "DEFGHIJKEGJDHFIK", "DEFGHIJLEGJDHFLI",
+			"DEFGHIKLEGIDHFLK", "DEFGHJKLEGJDHFLK", "DEFGIJKLEGIDJFLK", "DEFHIJKLEJIDHFLK", "DEGHIJKLEJIDHGLK", "DFGHIJKLHGIDJFLK", "EFGHIJKLEJIFHGLK" };
+
+	/** clave = grupos clasificados (8 letras ordenadas) -> asignación (8 letras). */
+	private static final Map<String, String> TABLA_TERCEROS = new HashMap<>();
+	static {
+		for (String fila : ANEXO_C_TERCEROS) {
+			TABLA_TERCEROS.put(fila.substring(0, 8), fila.substring(8));
+		}
+	}
+
 	public void calcularRonda32() {
 		// Recopilar los terceros de cada grupo y ordenar por mejor rendimiento
 		List<Posicion> terceros = new ArrayList<>();
@@ -900,20 +1001,9 @@ public class Bean_Marcadores implements Serializable {
 			Integer fpB = (Integer) b.getAtributos().get("ta") + 3 * (Integer) b.getAtributos().get("tr");
 			return fpA.compareTo(fpB);
 		});
-		// Asignación de los 8 mejores terceros a sus cupos mediante emparejamiento
-		// bipartito (matching de Kuhn), no greedy: garantiza una asignación completa
-		// y determinística. Grupos permitidos por cupo según el bracket oficial
-		// FIFA 2026 (A=0 … L=11).
-		LinkedHashMap<String, List<Integer>> cuposTerceros = new LinkedHashMap<>();
-		cuposTerceros.put("r32_74", Arrays.asList(0, 1, 2, 3, 5)); // 3 A/B/C/D/F
-		cuposTerceros.put("r32_77", Arrays.asList(2, 3, 5, 6, 7)); // 3 C/D/F/G/H
-		cuposTerceros.put("r32_79", Arrays.asList(2, 4, 5, 7, 8)); // 3 C/E/F/H/I
-		cuposTerceros.put("r32_80", Arrays.asList(4, 7, 8, 9, 10)); // 3 E/H/I/J/K
-		cuposTerceros.put("r32_81", Arrays.asList(1, 4, 5, 8, 9)); // 3 B/E/F/I/J
-		cuposTerceros.put("r32_82", Arrays.asList(0, 4, 7, 8, 9)); // 3 A/E/H/I/J
-		cuposTerceros.put("r32_85", Arrays.asList(4, 5, 6, 8, 9)); // 3 E/F/G/I/J
-		cuposTerceros.put("r32_87", Arrays.asList(3, 4, 8, 9, 11)); // 3 D/E/I/J/L
-		Map<String, Equipo> asignacionTerceros = asignarMejoresTerceros(terceros, cuposTerceros);
+		// Asignación de los 8 mejores terceros a sus cupos según la tabla oficial
+		// del Anexo C del reglamento FIFA 2026 (las 495 combinaciones posibles).
+		Map<String, Equipo> asignacionTerceros = asignarMejoresTerceros(terceros);
 
 		// Partidos 1-8: ganadores vs mejores terceros
 		// 2do Grupo A contra 2do Del Grupo B
@@ -956,57 +1046,46 @@ public class Bean_Marcadores implements Serializable {
 	}
 
 	/**
-	 * Asigna los mejores terceros (por ranking) a sus cupos de la Ronda de 32
-	 * mediante un emparejamiento bipartito (algoritmo de Kuhn) en vez de un greedy.
-	 * Toma los N mejores terceros (N = nº de cupos) y los reparte de forma que cada
-	 * cupo reciba el tercero de un grupo permitido. La FIFA garantiza que esa
-	 * asignación completa siempre existe, así que es determinística y nunca deja
-	 * cupos vacíos (salvo que haya menos terceros que cupos, lo que no ocurre con
-	 * los 12 grupos completos).
+	 * Asigna los 8 mejores terceros a sus cupos de la Ronda de 32 usando la tabla
+	 * oficial del Anexo C del reglamento FIFA 2026.
+	 *
+	 * <p>El reparto de los mejores terceros NO es un emparejamiento libre: la FIFA
+	 * lo fijó de antemano con una tabla de 495 filas (todas las combinaciones de
+	 * cuáles 8 de los 12 grupos clasifican su tercero). Para una misma combinación
+	 * suele existir más de un emparejamiento válido dentro de los grupos permitidos
+	 * por cupo, por lo que un matching (greedy o de Kuhn) puede dar un cruce distinto
+	 * al oficial. Por eso se consulta la tabla en vez de calcular un matching.
 	 *
 	 * @param tercerosOrdenados terceros de cada grupo, ya ordenados de mejor a peor
-	 * @param cuposTerceros      cupo R32 -> grupos permitidos (orden de inserción)
-	 * @return cupo R32 -> equipo tercero asignado (null si no se pudo asignar)
+	 * @return cupo R32 -> equipo tercero asignado (null si aún no están los 8)
 	 */
-	private Map<String, Equipo> asignarMejoresTerceros(List<Posicion> tercerosOrdenados,
-			LinkedHashMap<String, List<Integer>> cuposTerceros) {
-		List<String> cupos = new ArrayList<>(cuposTerceros.keySet());
-		// Los mejores terceros que clasifican (la lista ya viene ordenada por ranking)
-		int n = Math.min(cupos.size(), tercerosOrdenados.size());
-		List<Integer> gruposClasificados = new ArrayList<>();
-		HashMap<Integer, Equipo> equipoPorGrupo = new HashMap<>();
-		for (int i = 0; i < n; i++) {
-			Posicion p = tercerosOrdenados.get(i);
-			Integer grupo = (Integer) p.getEquipo().getAtributos().get("grupo");
-			gruposClasificados.add(grupo);
-			equipoPorGrupo.put(grupo, p.getEquipo());
-		}
-		// matchCupo[c] = grupo asignado al cupo c (o null)
-		Integer[] matchCupo = new Integer[cupos.size()];
-		for (Integer grupo : gruposClasificados) {
-			boolean[] visit = new boolean[cupos.size()];
-			asignarKuhn(grupo, cupos, cuposTerceros, matchCupo, visit);
-		}
+	private Map<String, Equipo> asignarMejoresTerceros(List<Posicion> tercerosOrdenados) {
 		Map<String, Equipo> resultado = new LinkedHashMap<>();
-		for (int c = 0; c < cupos.size(); c++) {
-			resultado.put(cupos.get(c), matchCupo[c] != null ? equipoPorGrupo.get(matchCupo[c]) : null);
+		for (String cupo : CUPOS_TERCEROS_ORDEN) {
+			resultado.put(cupo, null);
+		}
+		// Hacen falta los 8 mejores terceros para resolver la combinación
+		if (tercerosOrdenados.size() < 8) {
+			return resultado;
+		}
+		// Los 8 mejores terceros (la lista ya viene ordenada por ranking)
+		Map<Character, Equipo> equipoPorGrupo = new HashMap<>();
+		char[] grupos = new char[8];
+		for (int i = 0; i < 8; i++) {
+			Equipo eq = tercerosOrdenados.get(i).getEquipo();
+			char letra = (char) ('A' + (Integer) eq.getAtributos().get("grupo"));
+			grupos[i] = letra;
+			equipoPorGrupo.put(letra, eq);
+		}
+		Arrays.sort(grupos);
+		String asignacion = TABLA_TERCEROS.get(new String(grupos));
+		if (asignacion == null) {
+			return resultado; // combinación no encontrada (no debería ocurrir)
+		}
+		for (int c = 0; c < CUPOS_TERCEROS_ORDEN.length; c++) {
+			resultado.put(CUPOS_TERCEROS_ORDEN[c], equipoPorGrupo.get(asignacion.charAt(c)));
 		}
 		return resultado;
-	}
-
-	/** Busca un camino aumentante para el grupo (algoritmo de Kuhn). */
-	private boolean asignarKuhn(Integer grupo, List<String> cupos,
-			LinkedHashMap<String, List<Integer>> cuposTerceros, Integer[] matchCupo, boolean[] visit) {
-		for (int c = 0; c < cupos.size(); c++) {
-			if (!visit[c] && cuposTerceros.get(cupos.get(c)).contains(grupo)) {
-				visit[c] = true;
-				if (matchCupo[c] == null || asignarKuhn(matchCupo[c], cupos, cuposTerceros, matchCupo, visit)) {
-					matchCupo[c] = grupo;
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	private void setR32Equipos(String nombre, Equipo eq1, Equipo eq2) {
