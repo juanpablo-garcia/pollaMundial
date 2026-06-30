@@ -78,7 +78,8 @@ public class ResultadosSyncService {
 		}
 		List<Partido> partidos = pu.getPartidos();
 
-		boolean huboCambios = false;
+		// 1) Descargar una sola vez los eventos de cada fecha del Mundial.
+		List<JsonNode> eventos = new ArrayList<>();
 		LocalDate hoy = LocalDate.now(ZoneOffset.UTC);
 		for (LocalDate d = INICIO_MUNDIAL; !d.isAfter(hoy); d = d.plusDays(1)) {
 			JsonNode scoreboard;
@@ -89,15 +90,40 @@ public class ResultadosSyncService {
 				continue;
 			}
 			for (JsonNode ev : scoreboard.path("events")) {
-				if (procesarEvento(ev, partidos, r)) {
-					huboCambios = true;
-				}
+				eventos.add(ev);
 			}
 		}
 
-		if (huboCambios) {
-			usuarioPartidoDao.save(pu);
+		// 2) Aplicar resultados propagando el bracket entre rondas: al cerrarse una
+		// llave (p. ej. la Ronda de 32) su ganador avanza a la siguiente fase
+		// (octavos) en el bracket oficial, lo que (a) hace aparecer el partido de la
+		// ronda siguiente con sus equipos y (b) habilita otorgar los puntos de
+		// clasificacion. Sin esta propagacion, el ganador "no pasaba" a octavos y el
+		// partido quedaba vacio. CalculadoraBracket.recalcular SOLO reescribe los
+		// equipos (eq1/eq2) de cada cruce; nunca toca goles, penales ni tarjetas.
+		// Se repite hasta que una pasada no cambie nada (cada ronda habilita la
+		// siguiente para emparejarla con ESPN dentro del mismo sync).
+		boolean huboCambios = false;
+		boolean cambioEnPasada = true;
+		int pasadas = 0;
+		while (cambioEnPasada && pasadas < 8) {
+			cambioEnPasada = false;
+			new CalculadoraBracket().recalcular(partidos);
+			for (JsonNode ev : eventos) {
+				if (procesarEvento(ev, partidos, r)) {
+					cambioEnPasada = true;
+					huboCambios = true;
+				}
+			}
+			pasadas++;
 		}
+		// Propaga el ganador de la ultima llave cerrada para que el partido de la
+		// siguiente ronda aparezca con sus equipos en el bracket real.
+		new CalculadoraBracket().recalcular(partidos);
+
+		// Guardamos siempre: aunque no se hayan cargado marcadores nuevos, la
+		// propagacion del bracket pudo dejar nuevos equipos en las rondas siguientes.
+		usuarioPartidoDao.save(pu);
 		// Recalcula siempre (aunque no haya cambios nuevos) para aplicar las reglas
 		// de puntaje vigentes sobre los resultados ya cargados (p.ej. el bloqueo de
 		// los terceros hasta que terminen todos los grupos).
@@ -126,7 +152,11 @@ public class ResultadosSyncService {
 		String esA = EquiposNombreMapper.aEspanol(enA);
 		String esB = EquiposNombreMapper.aEspanol(enB);
 		if (esA == null || esB == null) {
-			r.sinMapeo.add((enA == null ? "?" : enA) + " vs " + (enB == null ? "?" : enB));
+			// procesarEvento se ejecuta en varias pasadas; evitamos duplicar el aviso.
+			String sm = (enA == null ? "?" : enA) + " vs " + (enB == null ? "?" : enB);
+			if (!r.sinMapeo.contains(sm)) {
+				r.sinMapeo.add(sm);
+			}
 			return false;
 		}
 
